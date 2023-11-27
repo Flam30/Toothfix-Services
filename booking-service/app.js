@@ -4,11 +4,17 @@ var morgan = require('morgan');
 var path = require('path');
 var cors = require('cors');
 
+// Import routes
+var bookingSchema = require('./controllers/bookings');
+var clinicSchema = require('./controllers/clinics');
+var patientSchema = require('./controllers/patients');
+var dentistSchema = require('./controllers/dentists');
+
 const { MongoClient } = require("mongodb");
 const password = encodeURIComponent("iloveteeth");
 
 var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixcluster0.ouccgbu.mongodb.net/?retryWrites=true&w=majority`
-var port = process.env.PORT || 4000;
+var port = process.env.PORT || 3001;
 
 mongoose.connect(mongoURI).catch(function (err) {
     if (err) {
@@ -31,14 +37,18 @@ app.options('*', cors());
 app.use(cors());
 
 // Define routes
-app.get('/api', function (req, res) {
+app.get('/', function (req, res) {
     res.json({ message: 'Welcome to ToothFix API' });
 });
 
 //put the routes:
+app.use('/bookings', bookingSchema);
+app.use('/clinics', clinicSchema);
+app.use('/patients', patientSchema);
+app.use('/dentists', dentistSchema);
 
 //catch invalid routes
-app.use('/api/*', function (req, res) {
+app.use('/*', function (req, res) {
     res.status(404).send({ url: req.originalUrl + ' not found' })
 });
 
@@ -62,5 +72,7 @@ app.use(function (err, req, res, next) {
 app.listen(port, function (err) { 
     if (err) throw err;
     console.log(`Express server listening on port ${port}, in ${env} mode`);
-    console.log(`Backend: http://localhost:${port}/api/`);
+    console.log(`Backend: http://localhost:${port}`);
 });
+
+module.exports = app;
