@@ -6,6 +6,7 @@ var cors = require('cors');
 
 // Import routes
 var notificationSchema = require('./models/notification');
+var MQTT = require('./utils/MqttController');
 
 const { MongoClient } = require("mongodb");
 const password = encodeURIComponent("iloveteeth");
@@ -13,6 +14,7 @@ const password = encodeURIComponent("iloveteeth");
 var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixclusternotifica.zrwvqej.mongodb.net/?retryWrites=true&w=majority`
 var port = process.env.PORT || 3003;
 
+//Connect to the database
 mongoose.connect(mongoURI).catch(function (err) {
     if (err) {
         console.error(`Failed to connect to MongoDB with given URI`);
@@ -21,6 +23,12 @@ mongoose.connect(mongoURI).catch(function (err) {
     }
     console.log(`Connected to MongoDB with URI: ${mongoURI}`);
 });
+
+// Connect to MQTT broker
+MQTT.connect();
+
+//Subscribe to MQTT topics
+MQTT.subscribe("toothfix/booking");
 
 // Create Express app
 var app = express();
@@ -62,6 +70,7 @@ app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.json(err_res);
 });
+
 
 app.listen(port, function (err) { 
     if (err) throw err;
