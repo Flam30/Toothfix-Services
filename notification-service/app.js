@@ -5,16 +5,13 @@ var path = require('path');
 var cors = require('cors');
 
 // Import routes
-var bookingSchema = require('./controllers/bookings');
-var clinicSchema = require('./controllers/clinics');
-var patientSchema = require('./controllers/patients');
-var dentistSchema = require('./controllers/dentists');
+var notificationRouter = require('./models/notification');
 
 const { MongoClient } = require("mongodb");
 const password = encodeURIComponent("iloveteeth");
 
-var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixcluster0.ouccgbu.mongodb.net/?retryWrites=true&w=majority`
-var port = process.env.PORT || 3001;
+var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixclusternotifica.zrwvqej.mongodb.net/?retryWrites=true&w=majority`
+var port = process.env.PORT || 3003;
 
 mongoose.connect(mongoURI).catch(function (err) {
     if (err) {
@@ -42,10 +39,7 @@ app.get('/', function (req, res) {
 });
 
 //put the routes:
-app.use('/bookings', bookingSchema);
-app.use('/clinics', clinicSchema);
-app.use('/patients', patientSchema);
-app.use('/dentists', dentistSchema);
+app.use('/notifications', notificationRouter);
 
 //catch invalid routes
 app.use('/*', function (req, res) {
@@ -71,9 +65,9 @@ app.use(function (err, req, res, next) {
 
 app.listen(port, function (err) { 
     if (err) throw err;
-    console.log(`Booking service started`);
-    console.log(`Booking service listening on port ${port}, in ${env} mode`);
+    console.log(`Notification service started`);
+    console.log(`Notification service listening on port ${port}, in ${env} mode`);
     console.log(`http://localhost:${port}`);
-});
+}); 
 
 module.exports = app;
