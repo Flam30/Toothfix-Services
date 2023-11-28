@@ -8,7 +8,7 @@ const { MongoClient } = require("mongodb");
 const password = encodeURIComponent("iloveteeth");
 
 var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixcluster0.ouccgbu.mongodb.net/?retryWrites=true&w=majority`
-var port = process.env.PORT || 4000;
+var port = process.env.PORT || 3001;
 
 mongoose.connect(mongoURI).catch(function (err) {
     if (err) {
@@ -59,7 +59,7 @@ app.use(function (err, req, res, next) {
     res.json(err_res);
 });
 
-app.listen(port, function (err) { 
+app.listen(port, function (err) {
     if (err) throw err;
     console.log(`Express server listening on port ${port}, in ${env} mode`);
     console.log(`Backend: http://localhost:${port}/api/`);
