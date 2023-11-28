@@ -5,7 +5,7 @@ var path = require('path');
 var cors = require('cors');
 
 // Import routes
-var notificationRouter = require('./models/notification');
+var notificationSchema = require('./models/notification');
 
 const { MongoClient } = require("mongodb");
 const password = encodeURIComponent("iloveteeth");
@@ -39,7 +39,7 @@ app.get('/', function (req, res) {
 });
 
 //put the routes:
-app.use('/notifications', notificationRouter);
+app.use('/notifications', notificationSchema);
 
 //catch invalid routes
 app.use('/*', function (req, res) {
