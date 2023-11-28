@@ -7,39 +7,18 @@ const options = {
     connectTimeout: 4000,
 };
 
+const mqttClient = mqtt.connect(url, options);
+
 //publish message
 function publish(topic, message) {
-    const client = mqtt.connect(url, options);
-
-    client.on('connect', () => {
-        client.publish(topic, message, (err) => {
-            if (err) {
-                console.error('publish failed', err)
-            }
-        });
-    })
-}
-
-//subscribe to topic
-function subscribe(topic) {
-    const client = mqtt.connect(url, options);
-
-    client.on('connect', () => {
-        client.subscribe('topic', (err) => {
-            if (err) {
-                console.error('subscription failed', err)
-            }
-            console.log(`Subscribed to topic: ${topic}`);
-        });
-        mqttClient.on('message', function (t, m) {
-            if (t === topic) {
-                callback(m.toString())
-            }
-        })
-    })
+    mqttClient.publish(topic, message, (err) => {
+        if (err) {
+            console.error('publish failed', err)
+        }
+        console.log(`TOPIC: ${topic} \nMESSAGE: ${message}` )
+    });
 }
 
 module.exports = {
-    publish,
-    subscribe
+    publish
 }
