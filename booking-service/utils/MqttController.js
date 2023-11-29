@@ -10,12 +10,12 @@ const options = {
 const mqttClient = mqtt.connect(url, options);
 
 //publish message
-function publish(topic, message) {
+async function publish(topic, message) {
     mqttClient.publish(topic, message, (err) => {
         if (err) {
             console.error('publish failed', err)
         }
-        console.log(`TOPIC: ${topic} \nMESSAGE: ${message}` )
+        console.log(`TOPIC: ${topic} \nMESSAGE: ${message}`)
     });
 }
 
