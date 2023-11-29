@@ -5,7 +5,7 @@ var path = require('path');
 var cors = require('cors');
 
 // Import routes
-var notificationSchema = require('./models/notification');
+var notificationSchema = require('./controllers/notifications');
 var MQTT = require('./utils/MqttController');
 
 const { MongoClient } = require("mongodb");
@@ -25,8 +25,7 @@ mongoose.connect(mongoURI).catch(function (err) {
 });
 
 // Connect to MQTT broker
-MQTT.connect();
-
+console.log('connected to MQTT broker')
 //Subscribe to MQTT topics
 MQTT.subscribe("toothfix/booking");
 

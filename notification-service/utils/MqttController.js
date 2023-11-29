@@ -1,11 +1,13 @@
 const mqtt = require("mqtt");
+const bodyParser= require("body-parser");
 
 //not sure about this we will see
-var notificationSchema = require("./models/notification");
-var router = express.Router();
+var notificationSchema = require("../controllers/notifications");
 var express = require("express");
 var Notification = require("../models/notification");
-app.use("/notifications", notificationSchema);
+var app = express();
+
+app.use(bodyParser.json);
 
 const port = "8080";
 const url = `ws://13.51.167.96:${port}`;
@@ -34,30 +36,27 @@ function publish(topic, message) {
 
 //subscribe to topic
 function subscribe(topic) {
-  mqttClient.subscribe("topic", (err) => {
+  mqttClient.subscribe(topic, (err) => {
     if (err) {
       console.error("subscription failed", err);
     }
     console.log(`Subscribed to topic: ${topic}`);
   });
+
   mqttClient.on("message", function (t, m) {
     //sending a notification when a booking is made
+    console.log('yyyyy')
     if (t === "toothfix/booking") {
       console.log("Received message from topic: ", t);
       //post to database
-      app.post("/", async function (res, next) {
-        try {
+          console.log("posting")
           let strMessage = m.toString();
           let objMessage = JSON.parse(strMessage);
           console.log(objMessage);
-          const notification = await Notification.create(objMessage);
+          const notification = Notification.create(objMessage);
           res.status(201).json(notification);
-        } catch (error) {
-          return next(error);
-        }
-      });
     }
-  });
+});
 }
 
 module.exports = {
