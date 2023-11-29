@@ -42,7 +42,7 @@ app.use(cors());
 
 // Define routes
 app.get('/', function (req, res) {
-    res.json({ message: 'Welcome to ToothFix API' });
+    res.json({ message: 'Welcome to notifications API' });
 });
 
 //put the routes:

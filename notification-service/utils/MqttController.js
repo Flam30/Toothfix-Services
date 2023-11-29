@@ -1,9 +1,9 @@
 const mqtt = require("mqtt");
-const bodyParser= require("body-parser");
+const bodyParser = require("body-parser");
 
 //not sure about this we will see
-var notificationSchema = require("../controllers/notifications");
 var express = require("express");
+var router = express.Router();
 var Notification = require("../models/notification");
 var app = express();
 
@@ -43,20 +43,32 @@ function subscribe(topic) {
     console.log(`Subscribed to topic: ${topic}`);
   });
 
-  mqttClient.on("message", function (t, m) {
+  mqttClient.on("message", async function (t, m) {
     //sending a notification when a booking is made
-    console.log('yyyyy')
+    console.log("yyyyy");
     if (t === "toothfix/booking") {
       console.log("Received message from topic: ", t);
       //post to database
-          console.log("posting")
-          let strMessage = m.toString();
-          let objMessage = JSON.parse(strMessage);
-          console.log(objMessage);
-          const notification = Notification.create(objMessage);
-          res.status(201).json(notification);
+
+      try {
+        console.log("posting");
+        let strMessage = await m.toString();
+        let objMessage = JSON.parse(strMessage);
+        console.log("JSON object from the booking:");
+        console.log(objMessage);
+
+        const notification = await Notification.create(objMessage); 
+        console.log("Created notification that should be posted:");
+        console.log(notification);
+        console.log('201')
+
+        //TODO: change the notification request to have the required fields
+      } catch (error) {
+        console.log(error, '500')
+      }
+    
     }
-});
+  });
 }
 
 module.exports = {
