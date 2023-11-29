@@ -69,7 +69,7 @@ app.use(function (err, req, res, next) {
     res.json(err_res);
 });
 
-app.listen(port, function (err) { 
+app.listen(port, function (err) {
     if (err) throw err;
     console.log(`Express server listening on port ${port}, in ${env} mode`);
     console.log(`Backend: http://localhost:${port}`);
