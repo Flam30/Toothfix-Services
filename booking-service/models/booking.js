@@ -6,6 +6,7 @@ var bookingSchema = new Schema({
     start: {type: String, required: true },
     end: { type: String, required: true},
     patient: { type: Schema.Types.String, ref: 'patients', required: true },
+    patientEmail: { type: String, required: true},
     dentist: { type: Schema.Types.String, ref: 'dentists', required: true }, 
 });
 

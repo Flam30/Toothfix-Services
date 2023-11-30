@@ -5,17 +5,16 @@ var path = require('path');
 var cors = require('cors');
 
 // Import routes
-var bookingSchema = require('./controllers/bookings');
-var clinicSchema = require('./controllers/clinics');
-var patientSchema = require('./controllers/patients');
-var dentistSchema = require('./controllers/dentists');
+var notificationSchema = require('./controllers/notifications');
+var MQTT = require('./utils/MqttController');
 
 const { MongoClient } = require("mongodb");
 const password = encodeURIComponent("iloveteeth");
 
-var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixcluster0.ouccgbu.mongodb.net/?retryWrites=true&w=majority`
-var port = process.env.PORT || 3001;
+var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixclusternotifica.zrwvqej.mongodb.net/?retryWrites=true&w=majority`
+var port = process.env.PORT || 3003;
 
+//Connect to the database
 mongoose.connect(mongoURI).catch(function (err) {
     if (err) {
         console.error(`Failed to connect to MongoDB with given URI`);
@@ -24,6 +23,11 @@ mongoose.connect(mongoURI).catch(function (err) {
     }
     console.log(`Connected to MongoDB with URI: ${mongoURI}`);
 });
+
+// Connect to MQTT broker
+console.log('connected to MQTT broker')
+//Subscribe to MQTT topics
+MQTT.subscribe("toothfix/booking"); //subscribe to booking topic
 
 // Create Express app
 var app = express();
@@ -38,14 +42,11 @@ app.use(cors());
 
 // Define routes
 app.get('/', function (req, res) {
-    res.json({ message: 'Welcome to ToothFix API' });
+    res.json({ message: 'Welcome to notifications API' });
 });
 
 //put the routes:
-app.use('/bookings', bookingSchema);
-app.use('/clinics', clinicSchema);
-app.use('/patients', patientSchema);
-app.use('/dentists', dentistSchema);
+app.use('/notifications', notificationSchema);
 
 //catch invalid routes
 app.use('/*', function (req, res) {
@@ -69,11 +70,12 @@ app.use(function (err, req, res, next) {
     res.json(err_res);
 });
 
-app.listen(port, function (err) {
+
+app.listen(port, function (err) { 
     if (err) throw err;
-    console.log(`Booking service started`);
-    console.log(`Booking service listening on port ${port}, in ${env} mode`);
+    console.log(`Notification service started`);
+    console.log(`Notification service listening on port ${port}, in ${env} mode`);
     console.log(`http://localhost:${port}`);
-});
+}); 
 
 module.exports = app;
