@@ -69,7 +69,7 @@ app.use(function (err, req, res, next) {
     res.json(err_res);
 });
 
-app.listen(port, function (err) { 
+app.listen(port, function (err) {
     if (err) throw err;
     console.log(`Booking service started`);
     console.log(`Booking service listening on port ${port}, in ${env} mode`);
