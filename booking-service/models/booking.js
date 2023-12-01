@@ -8,6 +8,7 @@ var bookingSchema = new Schema({
     patient: { type: Schema.Types.String, ref: 'patients', required: true },
     patientEmail: { type: String, required: true},
     dentist: { type: Schema.Types.String, ref: 'dentists', required: true }, 
+    slotId: { type: String },
 });
 
 module.exports = mongoose.model('bookings', bookingSchema);

@@ -2,19 +2,62 @@ var express = require('express');
 var router = express.Router();
 var Booking = require('../models/booking')
 var mqttClient = require('../utils/MqttController')
+const mqtt = require("mqtt");
 
-//No editing ergo no patch or put
+
+const { EventEmitter } = require('events');
+
+// Create an event emitter instance
+const eventEmitter = new EventEmitter();
+
+// Function to get confirmation from the other service -- TODO FIIIIIIXXXX THIIIIIIISSSSSS
+async function getConfirmation(slotId) {
+    return new Promise((resolve, reject) => {
+        eventEmitter.on("message", async function (t, m) {
+            if (t === "toothfix/booking/confirmation") {
+                console.log("Received message from topic: ", t);
+                console.log("Message: ", m.toString());
+                var objConfirmation = JSON.parse(m.toString());
+                if (objConfirmation.slotID === slotId) {
+                    if (objConfirmation.approved === "true") {
+                        console.log("Booking approved");
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                }
+            }
+        });
+    });
+}
+
 // POST
 router.post("/", async function (req, res, next) {
     try {
-        const booking = await Booking.create(req.body);
-        res.status(201).json(booking);
-        mqttClient.publish('toothfix/booking', JSON.stringify(req.body));
-    } catch (error) {
+        //PART 1  --  publish so that the availability service sends a confirmation
+        mqttClient.publish('toothfix/booking/pending', JSON.stringify(req.body.slotId));
+        const slotId = req.body.slotId;
+
+        //PART 2  --  subscribe to the confirmation topic,
+        mqttClient.subscribe('toothfix/booking/confirmation');
+
+        // Wait for the confirmation
+        const confirmationResult = await getConfirmation(slotId);
+
+        // Unsubscribe from the confirmation topic
+        mqttClient.unsubscribe('toothfix/booking/confirmation');
+
+        //Logic for handling TRUE/FALSE from getConfirmation(slotId) goes here
+        if (confirmationResult) {
+            const booking = await Booking.create(req.body);
+            res.status(200).json(booking);
+        } else {
+            res.status(400).json({ message: 'Booking canceled. Slot not available.' });
+        }
+    }catch (error) {
         return next(error);
     }
 });
-
 
 //GET
 /* TODO: Filter by clinic */
