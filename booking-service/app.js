@@ -13,6 +13,8 @@ var dentistSchema = require('./controllers/dentists');
 const { MongoClient } = require("mongodb");
 const password = encodeURIComponent("iloveteeth");
 
+var MQTT = require('./utils/MqttController');
+
 var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixcluster0.ouccgbu.mongodb.net/?retryWrites=true&w=majority`
 var port = process.env.PORT || 3001;
 
@@ -51,6 +53,9 @@ app.use('/dentists', dentistSchema);
 app.use('/*', function (req, res) {
     res.status(404).send({ url: req.originalUrl + ' not found' })
 });
+
+//subscribe to MQTT
+// MQTT.subscribe("toothfix/booking/confirmation"); //subscribe to booking confirmation topic
 
 // Error handler (i.e., when exception is thrown) must be registered last
 var env = app.get('env');

@@ -47,4 +47,6 @@ function subscribe(topic) {
 module.exports = {
     publish,
     subscribe,
+    mqttClient,
+    mqtt
 };
