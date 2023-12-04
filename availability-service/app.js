@@ -3,8 +3,9 @@ var mongoose = require('mongoose');
 var morgan = require('morgan');
 var path = require('path');
 var cors = require('cors');
-var mqttClient = require('./utils/MqttController')
-var confirmMessage = require('./confirm')
+
+
+const { getMessages } = require('./confirmBooking.js');
 
 // Import routes
 var slotsSchema = require('./controllers/slots');
@@ -23,6 +24,7 @@ mongoose.connect(mongoURI).catch(function (err) {
     }
     console.log(`Connected to MongoDB with URI: ${mongoURI}`);
 });
+
 
 // Create Express app
 var app = express();
@@ -49,10 +51,9 @@ app.use('/*', function (req, res) {
     res.status(404).send({ url: req.originalUrl + ' not found' })
 });
 
-//subscribe to "pending confirmation" topic
-mqttClient.subscribe();
-//confirmMessage.confirmBooking();
-mqttClient.getMessages();
+//getMessages
+getMessages()
+
 
 // Error handler (i.e., when exception is thrown) must be registered last
 var env = app.get('env');
