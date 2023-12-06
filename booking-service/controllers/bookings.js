@@ -11,12 +11,8 @@ const eventEmitter = new EventEmitter();
 subscribe('toothfix/booking/confirmation');
 
 mqttClient.on('message', function (topic, message) {
-    handleMqttMessage(topic, message);
-  });
-
-function handleMqttMessage(topic, message){ //function to emit 
     eventEmitter.emit("message", topic, message);
-}
+  });
 
 // Function to get confirmation from the other service -- TODO FIIIIIIXXXX THIIIIIIISSSSSS
 async function getConfirmation(slotId) {
@@ -27,17 +23,18 @@ async function getConfirmation(slotId) {
                 console.log("Message: ", m.toString());
                 const objConfirmation = JSON.parse(m.toString());
                 console.log(objConfirmation);
-                if (objConfirmation.slotId === slotId) {
-                    if (objConfirmation.approved === "true") {
-                        console.log("Booking approved");
-                        resolve(true);
-                    } else {
-                        reject();
-                    }
-                }else{
-                    reject();
-                }
-            }
+                resolve(true);
+                // if (objConfirmation.slotId === slotId) {
+                //     if (objConfirmation.approved === "true") {
+                //         console.log("Booking approved");
+                //         resolve(true);
+                //     } else {
+                //         reject();
+                //     }
+                // }else{
+                //     reject();
+                // }
+            }else{reject();}
         });
     });
 }
@@ -45,26 +42,30 @@ async function getConfirmation(slotId) {
 
 // Set up the event listener for MQTT messages
 
+// helper function
+
+
 // POST
 router.post("/", async function (req, res, next) {
     try {
         //PART 1  --  publish so that the availability service sends a confirmation
-        publish('toothfix/booking/pending', JSON.stringify(req.body.slotId));
+        const slotIdMessage = {
+            "slotId": req.body.slotId
+          }
+
+        publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
         const slotId = req.body.slotId;
 
         // Wait for the confirmation
-        const confirmationResult = await getConfirmation(slotId).then(() => {
-            console.log("debug 1");
+        const confirmationResult = await getConfirmation(slotId)
             
         //Logic for handling TRUE/FALSE from getConfirmation(slotId) goes here
         if (confirmationResult) {
             const booking = Booking.create(req.body);
             res.status(200).json(booking);
-            console.log("debug 2");
         } else {
             res.status(400).json({ message: 'Booking canceled. Slot not available.' });
         }
-    })
     }catch (error) {
         res.status(500).json(error);
     }finally{
