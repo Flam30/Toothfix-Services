@@ -5,7 +5,6 @@ const { getSlotById } = require('./findSlot');
 async function sendBookingConfirmation(slotId) {
     try {
         let slot = await getSlotById(slotId);
-        console.log(slot._id);
 
         let confirmation = {
             "slotId": slot._id,

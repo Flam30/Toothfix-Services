@@ -1,0 +1,4 @@
+- [x] subscribe to pending booking
+- [x] check if booking sent by bookings is available
+- [x] publish if the booking is available
+- [ ] Maybe: algorithm that populates database each week with new slots for bookings, with `available = false`
