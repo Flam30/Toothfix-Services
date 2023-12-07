@@ -10,6 +10,8 @@ const eventEmitter = new EventEmitter();
 
 subscribe('toothfix/booking/confirmation');
 
+const bookingSlots = [];
+
 mqttClient.on('message', function (topic, message) {
     eventEmitter.emit("message", topic, message);
   });
@@ -25,10 +27,11 @@ async function getConfirmation(slotId) {
                 console.log(objConfirmation);
                 // resolve(true);
                 //check if the slotId is the same as the one in the message
-                if (objConfirmation.slotId === slotId) {
+                if (bookingSlots.includes(objConfirmation.slotId)) {
                     if(objConfirmation.available === true){
+                        bookingSlots.splice(bookingSlots.indexOf(objConfirmation.slotId), 1);
                         resolve(true);
-                    }else(resolve(false));
+                    } else(resolve(false));
                 } else {
                     resolve(false);
                 }
@@ -47,6 +50,7 @@ router.post("/", async function (req, res, next) {
 
         publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
         const slotId = req.body.slotId;
+        bookingSlots.push(slotId);
 
         // Wait for the confirmation
         const confirmationResult = await getConfirmation(slotId)
