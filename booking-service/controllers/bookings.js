@@ -23,27 +23,19 @@ async function getConfirmation(slotId) {
                 console.log("Message: ", m.toString());
                 const objConfirmation = JSON.parse(m.toString());
                 console.log(objConfirmation);
-                resolve(true);
-                // if (objConfirmation.slotId === slotId) {
-                //     if (objConfirmation.approved === "true") {
-                //         console.log("Booking approved");
-                //         resolve(true);
-                //     } else {
-                //         reject();
-                //     }
-                // }else{
-                //     reject();
-                // }
+                // resolve(true);
+                //check if the slotId is the same as the one in the message
+                if (objConfirmation.slotId === slotId) {
+                    if(objConfirmation.available === true){
+                        resolve(true);
+                    }else(resolve(false));
+                } else {
+                    resolve(false);
+                }
             }else{reject();}
         });
     });
 }
-//subscribe to the confirmation topic
-
-// Set up the event listener for MQTT messages
-
-// helper function
-
 
 // POST
 router.post("/", async function (req, res, next) {
@@ -64,12 +56,10 @@ router.post("/", async function (req, res, next) {
             const booking = Booking.create(req.body);
             res.status(200).json(booking);
         } else {
-            res.status(400).json({ message: 'Booking canceled. Slot not available.' });
+            res.status(409).json({ message: 'Booking canceled. Slot not available.' });
         }
     }catch (error) {
         res.status(500).json(error);
-    }finally{
-        mqttClient.unsubscribe('toothfix/booking/confirmation');
     }
 });
 
