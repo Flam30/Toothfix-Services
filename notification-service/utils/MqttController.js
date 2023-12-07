@@ -33,7 +33,7 @@ function publish(topic, message) {
 }
 
 //subscribe to topic
-function subscribe(topic) {
+async function subscribe(topic) {
   mqttClient.subscribe(topic, (err) => {
     if (err) {
       console.error("subscription failed", err);
