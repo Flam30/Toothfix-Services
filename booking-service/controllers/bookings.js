@@ -10,7 +10,7 @@ const eventEmitter = new EventEmitter();
 
 subscribe('toothfix/booking/confirmation');
 
-const bookingSlots = new Set([]);
+const bookingSlots = [];
 
 mqttClient.on('message', function (topic, message) {
     eventEmitter.emit("message", topic, message);
@@ -27,9 +27,9 @@ async function getConfirmation(slotId) {
                 console.log(objConfirmation);
                 // resolve(true);
                 //check if the slotId is the same as the one in the message
-                if (bookingSlots.has(objConfirmation.slotId)) {
+                if (bookingSlots.includes(objConfirmation.slotId)) {
                     if(objConfirmation.available === true){
-                        bookingSlots.delete(objConfirmation.slotId);
+                        bookingSlots.splice(bookingSlots.indexOf(objConfirmation.slotId), 1);
                         resolve(true);
                     } else(resolve(false));
                 } else {
@@ -43,14 +43,15 @@ async function getConfirmation(slotId) {
 // POST
 router.post("/", async function (req, res, next) {
     try {
+        const slotId = req.body.slotId;
+        bookingSlots.push(slotId);
+
         //PART 1  --  publish so that the availability service sends a confirmation
         const slotIdMessage = {
             "slotId": req.body.slotId
           }
 
         publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
-        const slotId = req.body.slotId;
-        bookingSlots.add(slotId);
 
         // Wait for the confirmation
         const confirmationResult = await getConfirmation(slotId)
