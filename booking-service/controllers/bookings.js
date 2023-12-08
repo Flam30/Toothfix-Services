@@ -43,15 +43,15 @@ async function getConfirmation(slotId) {
 // POST
 router.post("/", async function (req, res, next) {
     try {
+        //PART 1  --  publish so that the availability service sends a confirmation
+        // const slotIdMessage = {
+        //     "slotId": req.body.slotId
+        //   }
+
+        // publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
+
         const slotId = req.body.slotId;
         bookingSlots.push(slotId);
-
-        //PART 1  --  publish so that the availability service sends a confirmation
-        const slotIdMessage = {
-            "slotId": req.body.slotId
-          }
-
-        publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
 
         // Wait for the confirmation
         const confirmationResult = await getConfirmation(slotId)
