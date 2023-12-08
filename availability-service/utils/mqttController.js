@@ -3,8 +3,6 @@ const mqtt = require('mqtt');
 const port = '8080';
 const url = `ws://13.51.167.96:${port}`;
 
-
-
 const options = {
     connectTimeout: 4000,
 };

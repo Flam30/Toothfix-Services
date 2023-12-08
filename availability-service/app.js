@@ -74,7 +74,7 @@ app.use(function (err, req, res, next) {
 
 app.listen(port, function (err) {
     if (err) throw err;
-    console.log(`Express server listening on port ${port}, in ${env} mode`);
+    console.log(`Availability service listening on port ${port}, in ${env} mode`);
     console.log(`Backend: http://localhost:${port}`);
 });
 
