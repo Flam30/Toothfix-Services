@@ -27,13 +27,26 @@ router.patch("/:_id", async function (req, res, next) {
 
 
 //GET
-router.get("/", async function (req, res, next) {
+router.get("/", async function (res, next) {
     try {
         const slots = await Slot.find({});
         res.status(200).json(slots);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return next(error);
     }
 });
+
+//GET available bookings by week number
+router.get("/weekNumber/:weekNumber", async function (req, res, next) {
+    try {
+        const slots = await Slot.find({
+            weekNumber: req.params.weekNumber,
+            available: true
+        })
+        res.status(200).json(slots);
+    } catch (error) {
+        return next(error);
+    }
+})
 
 module.exports = router;
