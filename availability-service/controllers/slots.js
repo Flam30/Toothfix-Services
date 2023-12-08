@@ -37,10 +37,11 @@ router.get("/", async function (res, next) {
 });
 
 //GET available bookings by week number
-router.get("/weekNumber/:weekNumber", async function (req, res, next) {
+router.get("/weekNumber/:weekNumber/dentist/:dentist", async function (req, res, next) {
     try {
         const slots = await Slot.find({
             weekNumber: req.params.weekNumber,
+            dentist: req.params.dentist,
             available: true
         })
         res.status(200).json(slots);
