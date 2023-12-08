@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var Slot = require('../models/slots')
 
+const { sendBookingConfirmation } = require('../utils/sendNotification.js');
+
 
 //POST
 router.post("/", async function (req, res, next) {
@@ -45,6 +47,16 @@ router.get("/weekNumber/:weekNumber", async function (req, res, next) {
         })
         res.status(200).json(slots);
     } catch (error) {
+        return next(error);
+    }
+})
+
+//GET confirmation request for the delegator
+router.get("/confirmation/:_id", async function (req, next) {
+    try {
+        sendBookingConfirmation(req.params._id);
+    }
+    catch (error) {
         return next(error);
     }
 })
