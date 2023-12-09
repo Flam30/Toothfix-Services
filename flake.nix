@@ -18,8 +18,7 @@
   in {
     packages.x86_64-linux = forEachProject (project:
       pkgs.buildNpmPackage {
-        inherit buildInputs;
-        version = version;
+        inherit buildInputs version;
         dontNpmBuild = true;
         pname = project;
         postInstall = ''
@@ -28,11 +27,10 @@
           lib="$out/lib/node_modules/${project}"
           touch $exe
           chmod +x $exe
-          ${pkgs.nodejs_20}/bin/npm install
           echo "
               #!/usr/bin/env bash
               cd $lib
-              ${pkgs.nodejs_20}/bin/npm run start" > $exe
+              ${pkgs.nodejs_20}/bin/node ./app.js" > $exe
         '';
 
         npmDepsHash = (builtins.readFile  ./${project}/hash );
@@ -44,7 +42,6 @@
         nil
         alejandra
         nodejs
-        node2nix
       ];
     };
   };
