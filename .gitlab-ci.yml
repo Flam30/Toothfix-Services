@@ -1,0 +1,22 @@
+default:
+  image: "nixos/nix"
+  tags:
+    - docker
+
+stages:
+  - build
+
+variables:
+  flags: '--extra-experimental-features nix-command --extra-experimental-features flakes'
+
+notification-service:
+  stage: build
+  script: nix ${flags} build .#notification-service
+
+availability-service:
+  stage: build
+  script: nix ${flags} build .#availability-service
+
+booking-service:
+  stage: build
+  script: nix ${flags} build .#booking-service
