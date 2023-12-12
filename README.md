@@ -31,6 +31,8 @@ BANCs controls the backend operations of Toothfix. To communicate to the fronten
 ## How to run the services 
 *Note: To have our entire system running, you will also need to run the [API Delegator](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/api-delegator) and the [Frontend](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/patient-interface).*
 
+**TODO: add npm install for every service
+
 Now, run the services:
 
 ### Windows
