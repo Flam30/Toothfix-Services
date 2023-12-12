@@ -10,14 +10,27 @@ const eventEmitter = new EventEmitter();
 
 subscribe('toothfix/booking/confirmation');
 
-const bookingSlots = [];
+//Set up Queue
+const Queue = require('bull');
+const redisConfig = {
+  redis: {
+    password: 'qtN6Ok1gmRDmPe0UP5sFQCmNhJEg5JPv',
+    host: 'redis-15929.c250.eu-central-1-1.ec2.cloud.redislabs.com',
+    port: 15929,
+  },
+};
+
+const jobQueue = new Queue('bookingQueue', redisConfig);
+
+
+
 
 mqttClient.on('message', function (topic, message) {
     eventEmitter.emit("message", topic, message);
   });
 
-// Function to get confirmation from the other service -- TODO FIIIIIIXXXX THIIIIIIISSSSSS
-async function getConfirmation(slotId) {
+// Function to get confirmation from the other service
+async function getConfirmation() {
     return new Promise((resolve, reject) => {
         eventEmitter.once("message", function (t, m) {
             if (t === "toothfix/booking/confirmation") {
@@ -25,16 +38,10 @@ async function getConfirmation(slotId) {
                 console.log("Message: ", m.toString());
                 const objConfirmation = JSON.parse(m.toString());
                 console.log(objConfirmation);
-                // resolve(true);
-                //check if the slotId is the same as the one in the message
-                if (bookingSlots.includes(objConfirmation.slotId)) {
-                    if(objConfirmation.available === true){
-                        bookingSlots.splice(bookingSlots.indexOf(objConfirmation.slotId), 1);
-                        resolve(true);
-                    } else(resolve(false));
-                } else {
-                    resolve(false);
-                }
+                if(objConfirmation.available === true){
+                    // bookingSlots.splice(bookingSlots.indexOf(objConfirmation.slotId), 1);
+                    resolve(true);
+                } else(resolve(false));
             }else{reject();}
         });
     });
@@ -43,29 +50,48 @@ async function getConfirmation(slotId) {
 // POST
 router.post("/", async function (req, res, next) {
     try {
-        //PART 1  --  publish so that the availability service sends a confirmation
-        // const slotIdMessage = {
-        //     "slotId": req.body.slotId
-        //   }
-
-        // publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
-
-        const slotId = req.body.slotId;
-        bookingSlots.push(slotId);
-
-        // Wait for the confirmation
-        const confirmationResult = await getConfirmation(slotId)
-            
-        //Logic for handling TRUE/FALSE from getConfirmation(slotId) goes here
-        if (confirmationResult) {
-            const booking = Booking.create(req.body);
-            res.status(200).json(booking);
-        } else {
-            res.status(409).json({ message: 'Booking canceled. Slot not available.' });
-        }
+        // Add a job to the queue
+        const request = req.body;
+        jobQueue.add(request);
+        res.status(200).json({ message: 'Booking request sent.' });
     }catch (error) {
         res.status(500).json(error);
     }
+});
+
+// Process jobs from the queue
+ jobQueue.process(async (job) => {
+    console.log('Processing job:', job.data);
+    // Add your job processing logic here
+
+    const slotIdMessage = {
+        "slotId": job.data.slotId
+    }
+    publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
+
+    const confirmationResult = await getConfirmation(job.data.slotId);
+
+    if (confirmationResult) {
+        const booking = Booking.create(job.data);
+        res.status(200).json(booking);
+        // resolve(true);
+    } else {
+        res.status(409).json({ message: 'Booking canceled. Slot not available.' });
+        // resolve(false);
+    }
+    
+    // return Promise.resolve(); // Resolve the promise when the job processing is complete
+});
+
+
+// Event listener for completed jobs
+jobQueue.on('completed', (job, result) => {
+    console.log(`Job ID ${job.id} completed with result:`, result);
+});
+
+// Event listener for failed jobs
+jobQueue.on('failed', (job, err) => {
+    console.error(`Job ID ${job.id} failed with error:`, err);
 });
 
 //GET
