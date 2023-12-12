@@ -28,7 +28,8 @@ mongoose.connect(mongoURI).catch(function (err) {
 console.log('connected to MQTT broker')
 //Subscribe to MQTT topics
 MQTT.subscribeBookings(); //subscribe to booking topic
-MQTT.subscribeCancellations(); //subscribe to booking topic
+MQTT.subscribeCancellations(); //subscribe to cancellations
+MQTT.subscribeAvailability(); //subscribe to availability
 
 // Create Express app
 var app = express();
