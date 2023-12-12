@@ -46,25 +46,23 @@ function publish(topic, message) {
   });
 }
 
-//subscribe to topic
-function subscribe(topic) {
-  mqttClient.subscribe(topic, (err) => {
+//subscribe to bookings
+function subscribeBookings() {
+  mqttClient.subscribe('toothfix/notifications/booking', (err) => {
     if (err) {
       console.error("subscription failed", err);
     }
-    console.log(`Subscribed to topic: ${topic}`);
+    console.log(`Subscribed to topic: toothfix/notifications/booking`);
   });
 
   mqttClient.on("message", async function (t, m) {
     //sending a notification when a booking is made
-    if (t === "toothfix/notification/booking") {
+    if (t === "toothfix/notifications/booking") {
       console.log("Received message from topic: ", t);
       //post to database
       try {
-        console.log("posting");
         let strMessage = await m.toString(); //converts the message to a string
         let objMessage = JSON.parse(strMessage);  //converts the string to a JSON object
-        console.log("JSON object from the booking:");
         console.log(objMessage);
 
         const notification = { //Make the notification object with the fields from the booking
@@ -76,9 +74,9 @@ function subscribe(topic) {
         const message = {
           from: "noreply@toothfix.me",
           to: objMessage.patientEmail,
-          subject: "Booking confirmation",
-          text: `You've booked an appointment! You have a new booking on ${objMessage.date.substring(8,10)}/${objMessage.date.substring(5,7)}/${objMessage.date.substring(0,4)} (DD/MM/YYYY) at ${objMessage.date.substring(11, 16)} with ${objMessage.dentist}.`,
-          html: `<html><h1>You've booked an appointment!</h1><p>You have a new booking on ${objMessage.date.substring(8,10)}/${objMessage.date.substring(5,7)}/${objMessage.date.substring(0,4)} (DD/MM/YYYY) at ${objMessage.date.substring(11, 16)} with ${objMessage.dentist}.</p><h2><a href='https://toothfix.me'>ToothFix.me</a></h2></html>`
+          subject: notification.title,
+          text: notification.body,
+          html: `<html><h2>You've booked an appointment!</h2><p>You have a new booking on ${objMessage.date.substring(8,10)}/${objMessage.date.substring(5,7)}/${objMessage.date.substring(0,4)} (DD/MM/YYYY) at ${objMessage.date.substring(11, 16)} with ${objMessage.dentist}.</p><h2><a href='https://toothfix.me'>ToothFix.me</a></h2></html>`
         };
 
         transporter.sendMail(message, function (err, info) {
@@ -90,9 +88,56 @@ function subscribe(topic) {
         });
 
         await Notification.create(notification); //post notification to the database
-        console.log("Created notification that should be posted:");
-        console.log(notification);
-        console.log('201')
+        
+      } catch (error) {
+        console.log(error, '500')
+      }
+    }
+  });
+}
+
+//subscribe to cancellations
+function subscribeCancellations() {
+  mqttClient.subscribe('toothfix/notifications/cancellation', (err) => {
+    if (err) {
+      console.error("subscription failed", err);
+    }
+    console.log(`Subscribed to topic: toothfix/notifications/cancellation`);
+  });
+
+  mqttClient.on("message", async function (t, m) {
+    //sending a notification when a booking is made
+    if (t === "toothfix/notifications/cancellation") {
+      console.log("Received message from topic: ", t);
+      //post to database
+      try {
+        let strMessage = await m.toString(); //converts the message to a string
+        let objMessage = JSON.parse(strMessage);  //converts the string to a JSON object
+        console.log(objMessage);
+
+        const notification = { //Make the notification object with the fields from the booking
+          title : "Booking cancelled",
+          body : `Your ToothFix appointment on ${objMessage.date.substring(8,10)}/${objMessage.date.substring(5,7)}/${objMessage.date.substring(0,4)} at ${objMessage.date.substring(11, 16)} with ${objMessage.dentist} has been cancelled.`,
+          recipientEmail : objMessage.patientEmail,      
+        }
+
+        const message = {
+          from: "noreply@toothfix.me",
+          to: objMessage.patientEmail,
+          subject: notification.title,
+          text: notification.body,
+          html: `<html><h2>Your appointment was cancelled!</h2><p>Your ToothFix appointment on ${objMessage.date.substring(8,10)}/${objMessage.date.substring(5,7)}/${objMessage.date.substring(0,4)} at ${objMessage.date.substring(11, 16)} with ${objMessage.dentist} has been cancelled.</p><h2><a href='https://toothfix.me'>ToothFix.me</a></h2></html>`
+        };
+
+        transporter.sendMail(message, function (err, info) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(`Email sent to ${objMessage.patientEmail}!`);
+          }
+        });
+
+        await Notification.create(notification); //post notification to the database
         
       } catch (error) {
         console.log(error, '500')
@@ -103,6 +148,7 @@ function subscribe(topic) {
 
 module.exports = {
   publish,
-  subscribe,
+  subscribeBookings,
+  subscribeCancellations,
   connect,
 };
