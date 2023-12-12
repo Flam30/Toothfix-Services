@@ -5,6 +5,7 @@ default:
 
 stages:
   - build
+  - check
 
 variables:
   flags: "--extra-experimental-features nix-command --extra-experimental-features flakes"
@@ -27,4 +28,9 @@ booking-service:
   stage: build
   script: 
     - nix ${flags} build .#booking-service && cachix push dit356 result
+
+check-formatting:
+  stage: check
+  script: nix ${flags} flake check
+  needs: []
 
