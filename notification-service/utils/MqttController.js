@@ -1,5 +1,19 @@
 const mqtt = require("mqtt");
 const bodyParser = require("body-parser");
+var nodemailer = require('nodemailer');
+
+var transporter = nodemailer.createTransport({
+    service: "OVH",
+    host: "ssl0.ovh.net",
+    port: 465,
+    name: "toothfix.me",
+    secure: true, 
+    auth: {
+      user: "noreply@toothfix.me",
+      pass: "ToothFix123",
+    },
+    from: "noreply@toothfix.me"
+  });
 
 var express = require("express");
 var Notification = require("../models/notification");
@@ -43,7 +57,7 @@ function subscribe(topic) {
 
   mqttClient.on("message", async function (t, m) {
     //sending a notification when a booking is made
-    if (t === "toothfix/booking") {
+    if (t === "toothfix/notification/booking") {
       console.log("Received message from topic: ", t);
       //post to database
       try {
@@ -53,12 +67,27 @@ function subscribe(topic) {
         console.log("JSON object from the booking:");
         console.log(objMessage);
 
-        const notification = { //Make the norification object with the fields from the booking
+        const notification = { //Make the notification object with the fields from the booking
           title : "Booking confirmation",
-          body : "You have a new booking on " + objMessage.date.substring(8,10) + "/" + objMessage.date.substring(5,7) + "/" 
-          + objMessage.date.substring(0,4) + " (DD/MM/YY)"  + " at " + objMessage.start + " with " + objMessage.dentist + ".",
+          body : `You've booked an appointment! You have a new booking on ${objMessage.date.substring(8,10)}/${objMessage.date.substring(5,7)}/${objMessage.date.substring(0,4)} (DD/MM/YYYY) at ${objMessage.date.substring(11, 16)} with ${objMessage.dentist}.`,
           recipientEmail : objMessage.patientEmail,      
         }
+
+        const message = {
+          from: "noreply@toothfix.me",
+          to: objMessage.patientEmail,
+          subject: "Booking confirmation",
+          text: `You've booked an appointment! You have a new booking on ${objMessage.date.substring(8,10)}/${objMessage.date.substring(5,7)}/${objMessage.date.substring(0,4)} (DD/MM/YYYY) at ${objMessage.date.substring(11, 16)} with ${objMessage.dentist}.`,
+          html: `<html><h1>You've booked an appointment!</h1><p>You have a new booking on ${objMessage.date.substring(8,10)}/${objMessage.date.substring(5,7)}/${objMessage.date.substring(0,4)} (DD/MM/YYYY) at ${objMessage.date.substring(11, 16)} with ${objMessage.dentist}.</p><h2><a href='https://toothfix.me'>ToothFix.me</a></h2></html>`
+        };
+
+        transporter.sendMail(message, function (err, info) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(`Email sent to ${objMessage.patientEmail}!`);
+          }
+        });
 
         await Notification.create(notification); //post notification to the database
         console.log("Created notification that should be posted:");
