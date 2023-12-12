@@ -4,19 +4,17 @@ var morgan = require('morgan');
 var path = require('path');
 var cors = require('cors');
 
+
+const { getMessages } = require('./confirmBooking.js');
+
 // Import routes
-var bookingSchema = require('./controllers/bookings');
-var clinicSchema = require('./controllers/clinics');
-var patientSchema = require('./controllers/patients');
-var dentistSchema = require('./controllers/dentists');
+var slotsSchema = require('./controllers/slots');
 
 const { MongoClient } = require("mongodb");
 const password = encodeURIComponent("iloveteeth");
 
-var MQTT = require('./utils/MqttController');
-
-var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@toothfixcluster0.ouccgbu.mongodb.net/?retryWrites=true&w=majority`
-var port = process.env.PORT || 3001;
+var mongoURI = process.env.MONGODB_URI || `mongodb+srv://admin:${password}@tothfixclusteravailabil.aok1zm8.mongodb.net/?retryWrites=true&w=majority`
+var port = process.env.PORT || 3002;
 
 mongoose.connect(mongoURI).catch(function (err) {
     if (err) {
@@ -26,6 +24,7 @@ mongoose.connect(mongoURI).catch(function (err) {
     }
     console.log(`Connected to MongoDB with URI: ${mongoURI}`);
 });
+
 
 // Create Express app
 var app = express();
@@ -38,24 +37,23 @@ app.use(morgan('dev'));
 app.options('*', cors());
 app.use(cors());
 
+
 // Define routes
 app.get('/', function (req, res) {
     res.json({ message: 'Welcome to ToothFix API' });
 });
 
 //put the routes:
-app.use('/bookings', bookingSchema);
-app.use('/clinics', clinicSchema);
-app.use('/patients', patientSchema);
-app.use('/dentists', dentistSchema);
+app.use('/slots', slotsSchema);
 
 //catch invalid routes
 app.use('/*', function (req, res) {
     res.status(404).send({ url: req.originalUrl + ' not found' })
 });
 
-//subscribe to MQTT
-// MQTT.subscribe("toothfix/booking/confirmation"); //subscribe to booking confirmation topic
+//getMessages
+getMessages()
+
 
 // Error handler (i.e., when exception is thrown) must be registered last
 var env = app.get('env');
@@ -76,9 +74,8 @@ app.use(function (err, req, res, next) {
 
 app.listen(port, function (err) {
     if (err) throw err;
-    console.log(`Booking service started`);
-    console.log(`Booking service listening on port ${port}, in ${env} mode`);
-    console.log(`http://localhost:${port}`);
+    console.log(`Availability service listening on port ${port}, in ${env} mode`);
+    console.log(`Backend: http://localhost:${port}`);
 });
 
 module.exports = app;
