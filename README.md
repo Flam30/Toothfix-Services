@@ -1,8 +1,14 @@
 # BANCs
 
+## Table of contents
+
+1. [Description of services](#description-of-services)
+2. [How to run the services](#how-to-run-the-services)
+3. [Ports](#ports)
+
 ## Introduction
 
-BANCs stands for Booking, Availability, Notification and Cancelation systems. These services are completely independent and communicate to eachother via MQTT.
+BANCs stands for Booking, Availability, and Notification systems. These services are completely independent and communicate to eachother via MQTT.
 
 BANCs controls the backend operations of Toothfix. To communicate to the frontend, BANCs does it via HTTP requests to the [API Delegator](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/api-delegator). The delegator will also decide which service to send the webpage's request to.
 
@@ -23,3 +29,18 @@ BANCs controls the backend operations of Toothfix. To communicate to the fronten
   - The service will also send a notification to the dentist if a booking is made. 
 
 ## How to run the services 
+*Note: To have our entire system running, you will also need to run the [API Delegator](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/api-delegator) and the [Frontend](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/patient-interface).*
+
+Now, run the services:
+
+### Windows
+1. Clone the repository and open the root folder, you will see all the folders for the services.
+2. Execute `servicesrunner.bat` to run all the services at once.
+
+### Linux
+@carlos
+
+## Ports
+- `booking - 3001`
+- `availability - 3002`
+- `notification - 3003`
