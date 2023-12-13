@@ -25,9 +25,9 @@ const jobQueue = new Queue('bookingQueue', redisConfig);
 
 
 
-mqttClient.on('message', function (topic, message) {
-    eventEmitter.emit("message", topic, message);
-  });
+// mqttClient.on('message', function (topic, message) {
+//     eventEmitter.emit("message", topic, message);
+// });
 
 // Function to get confirmation from the other service
 async function getConfirmation() {
@@ -60,7 +60,7 @@ router.post("/", async function (req, res, next) {
 });
 
 // Process jobs from the queue
- jobQueue.process(async (job) => {
+ jobQueue.process((job) => {
     console.log('Processing job:', job.data);
     // Add your job processing logic here
 
@@ -69,18 +69,31 @@ router.post("/", async function (req, res, next) {
     }
     publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
 
-    const confirmationResult = await getConfirmation(job.data.slotId);
+    const confirmationResult = false;
+
+    mqttClient.on('message', function (topic, message) {
+        console.log("Received message from topic: ", topic);
+        if (t === "toothfix/booking/confirmation") {
+            console.log("Received message from topic: ", t);
+            console.log("Message: ", m.toString());
+            const objConfirmation = JSON.parse(m.toString());
+            console.log(objConfirmation);
+            if(objConfirmation.available === true){
+                confirmationResult = true;
+            } else {confirmationResult = false;};
+        }
+    });
+
+    // const confirmationResult = await getConfirmation(job.data.slotId);
 
     if (confirmationResult) {
         const booking = Booking.create(job.data);
-        res.status(200).json(booking);
-        // resolve(true);
+        publish("toothfix/notifications/booking", JSON.stringify(booking));
+        // res.status(200).json(booking);
     } else {
-        res.status(409).json({ message: 'Booking canceled. Slot not available.' });
-        // resolve(false);
+        // res.status(409).json({ message: 'Booking canceled. Slot not available.' });
     }
-    
-    // return Promise.resolve(); // Resolve the promise when the job processing is complete
+
 });
 
 
