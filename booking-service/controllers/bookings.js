@@ -22,30 +22,11 @@ const redisConfig = {
 
 const jobQueue = new Queue('bookingQueue', redisConfig);
 
-
-
-
-// mqttClient.on('message', function (topic, message) {
-//     eventEmitter.emit("message", topic, message);
-// });
-
-// Function to get confirmation from the other service
-async function getConfirmation() {
-    return new Promise((resolve, reject) => {
-        eventEmitter.once("message", function (t, m) {
-            if (t === "toothfix/booking/confirmation") {
-                console.log("Received message from topic: ", t);
-                console.log("Message: ", m.toString());
-                const objConfirmation = JSON.parse(m.toString());
-                console.log(objConfirmation);
-                if(objConfirmation.available === true){
-                    // bookingSlots.splice(bookingSlots.indexOf(objConfirmation.slotId), 1);
-                    resolve(true);
-                } else(resolve(false));
-            }else{reject();}
-        });
-    });
-}
+//MQTT listener for messages (all topics)
+mqttClient.on('message', function (topic, message) {
+    console.log("Emitted event from mqttClient");
+    eventEmitter.emit("message", topic, message);
+});
 
 // POST
 router.post("/", async function (req, res, next) {
@@ -53,54 +34,59 @@ router.post("/", async function (req, res, next) {
         // Add a job to the queue
         const request = req.body;
         jobQueue.add(request);
-        res.status(200).json({ message: 'Booking request sent.' });
+        
+        // Event listener for completed jobs
+        jobQueue.on('completed', (job, result) => {
+            console.log(`Job ID ${job.id} completed with result:`, result);
+            const booking = Booking.create(request);
+            // publish("toothfix/notifications/booking", JSON.stringify(booking));
+            res.status(200).json(request);
+        });
     }catch (error) {
         res.status(500).json(error);
     }
 });
 
 // Process jobs from the queue
- jobQueue.process((job) => {
+ jobQueue.process(async function (job, done) {
     console.log('Processing job:', job.data);
-    // Add your job processing logic here
+    const slotIdMessage = { "slotId": job.data.slotId }
+    console.log(slotIdMessage);
 
-    const slotIdMessage = {
-        "slotId": job.data.slotId
-    }
-    publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
+    const confirmationResult = await new Promise((resolve) => {
+        publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
 
-    const confirmationResult = false;
-
-    mqttClient.on('message', function (topic, message) {
-        console.log("Received message from topic: ", topic);
-        if (t === "toothfix/booking/confirmation") {
-            console.log("Received message from topic: ", t);
-            console.log("Message: ", m.toString());
-            const objConfirmation = JSON.parse(m.toString());
-            console.log(objConfirmation);
-            if(objConfirmation.available === true){
-                confirmationResult = true;
-            } else {confirmationResult = false;};
-        }
+        eventEmitter.on("message", function (t, m) {
+            if (t === "toothfix/booking/confirmation") {
+                console.log("Received message from topic: ", t);
+                console.log("Message: ", m.toString());
+                const objConfirmation = JSON.parse(m.toString());
+                console.log(objConfirmation);
+                if(objConfirmation.available === true){
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            }
+        })
     });
 
     // const confirmationResult = await getConfirmation(job.data.slotId);
 
     if (confirmationResult) {
-        const booking = Booking.create(job.data);
-        publish("toothfix/notifications/booking", JSON.stringify(booking));
-        // res.status(200).json(booking);
+        // const booking = Booking.create(job.data);
+        // console.log("Booking created");
+        // publish("toothfix/notifications/booking", JSON.stringify(booking));
+        done();
     } else {
-        // res.status(409).json({ message: 'Booking canceled. Slot not available.' });
+        console.log("Booking failed");
+        return done(err)
     }
 
 });
 
 
-// Event listener for completed jobs
-jobQueue.on('completed', (job, result) => {
-    console.log(`Job ID ${job.id} completed with result:`, result);
-});
+
 
 // Event listener for failed jobs
 jobQueue.on('failed', (job, err) => {
