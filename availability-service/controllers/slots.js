@@ -27,9 +27,8 @@ router.patch("/:_id", async function (req, res, next) {
     }
 });
 
-
 //GET
-router.get("/", async function (res, next) {
+router.get("/", async function (req, res, next) {
     try {
         const slots = await Slot.find({});
         res.status(200).json(slots);
@@ -53,7 +52,7 @@ router.get("/weekNumber/:weekNumber/dentist/:dentist", async function (req, res,
 })
 
 //GET confirmation request for the delegator
-router.get("/confirmation/:_id", async function (req, next) {
+router.get("/confirmation/:_id", async function (req, res, next) {
     try {
         sendBookingConfirmation(req.params._id);
     }
