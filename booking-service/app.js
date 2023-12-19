@@ -7,7 +7,6 @@ var cors = require('cors');
 // Import routes
 var bookingSchema = require('./controllers/bookings');
 var clinicSchema = require('./controllers/clinics');
-var patientSchema = require('./controllers/patients');
 var dentistSchema = require('./controllers/dentists');
 
 const { MongoClient } = require("mongodb");
@@ -46,7 +45,6 @@ app.get('/', function (req, res) {
 //put the routes:
 app.use('/bookings', bookingSchema);
 app.use('/clinics', clinicSchema);
-app.use('/patients', patientSchema);
 app.use('/dentists', dentistSchema);
 
 //catch invalid routes
