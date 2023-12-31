@@ -1,8 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Booking = require('../models/booking')
-const { mqtt, mqttClient, publish, subscribe } = require('../utils/MqttController');
-// const mqtt = require('mqtt');
+const { mqttClient, publish, subscribe } = require('../utils/MqttController');
 const { EventEmitter } = require('events');
 
 // Create an event emitter instance
@@ -13,14 +12,15 @@ subscribe('toothfix/booking/confirmation');
 //Set up Queue
 const Queue = require('bull');
 const redisConfig = {
-  redis: {
-    password: 'qtN6Ok1gmRDmPe0UP5sFQCmNhJEg5JPv',
-    host: 'redis-15929.c250.eu-central-1-1.ec2.cloud.redislabs.com',
-    port: 15929,
-  },
+    redis: {
+        password: 'qtN6Ok1gmRDmPe0UP5sFQCmNhJEg5JPv',
+        host: 'redis-15929.c250.eu-central-1-1.ec2.cloud.redislabs.com',
+        port: 15929,
+    },
 };
 
-const jobQueue = new Queue('bookingQueue', redisConfig);
+
+const requestQueue = new Queue('requestQueue', redisConfig);
 
 //MQTT listener for messages (all topics)
 mqttClient.on('message', function (topic, message) {
@@ -30,30 +30,28 @@ mqttClient.on('message', function (topic, message) {
 
 // POST
 router.post("/", async function (req, res, next) {
+    let request = req.body;
     try {
-        // Add a job to the queue
-        const request = req.body;
-        jobQueue.add(request);
-        
-        // Event listener for completed jobs
-        jobQueue.on('completed', (job, result) => {
-            console.log(`Job ID ${job.id} completed with result:`, result);
-            const booking = Booking.create(request);
+        let job = await requestQueue.add(request);
+        let result = await job.finished()
+        if (result === true) {
+            let booking = await Booking.create(request);
             // publish("toothfix/notifications/booking", JSON.stringify(booking));
-            res.status(200).json(request);
-        });
-    }catch (error) {
+            return res.status(200).json(booking);
+        } else {
+            return res.status(422).json({ message: "slot not available" })
+        }
+    } catch (error) {
         res.status(500).json(error);
     }
 });
 
 // Process jobs from the queue
- jobQueue.process(async function (job, done) {
+requestQueue.process(async function (job) {
     console.log('Processing job:', job.data);
-    const slotIdMessage = { "slotId": job.data.slotId }
-    console.log(slotIdMessage);
+    let slotIdMessage = { "slotId": job.data.slotId } 
 
-    const confirmationResult = await new Promise((resolve) => {
+    let confirmationResult = await new Promise((resolve) => {
         publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
 
         eventEmitter.on("message", function (t, m) {
@@ -70,26 +68,11 @@ router.post("/", async function (req, res, next) {
             }
         })
     });
-
-    // const confirmationResult = await getConfirmation(job.data.slotId);
-
-    if (confirmationResult) {
-        // const booking = Booking.create(job.data);
-        // console.log("Booking created");
-        // publish("toothfix/notifications/booking", JSON.stringify(booking));
-        done();
-    } else {
-        console.log("Booking failed");
-        return done(err)
-    }
-
+    return confirmationResult
 });
 
-
-
-
 // Event listener for failed jobs
-jobQueue.on('failed', (job, err) => {
+requestQueue.on('failed', (job, err) => {
     console.error(`Job ID ${job.id} failed with error:`, err);
 });
 
