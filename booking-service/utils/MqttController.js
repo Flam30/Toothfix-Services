@@ -28,22 +28,6 @@ function subscribe(topic) {
   });
 }
   
-// async function getConfirmation(slotId) {
-//     mqttClient.on("message", async function (t, m) {
-//         if (t === "toothfix/booking/confirmation") {
-//           console.log("Received message from topic: ", t);
-//           console.log("Message: ", m.toString());
-//           var objConfirmation = JSON.parse(m.toString());
-//           if(objConfirmation.slotID === slotId){
-//             if(objConfirmation.approved === "true"){
-//                 console.log("Booking approved");
-//                 return true;
-//             } else return false;
-//         }
-//       }
-//     });
-// }
-  
 module.exports = {
     publish,
     subscribe,

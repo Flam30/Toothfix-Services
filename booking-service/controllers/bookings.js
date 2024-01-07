@@ -1,39 +1,14 @@
 var express = require('express');
 var router = express.Router();
 var Booking = require('../models/booking')
-const { mqttClient, publish, subscribe } = require('../utils/MqttController');
-const { EventEmitter } = require('events');
-
-// Create an event emitter instance
-const eventEmitter = new EventEmitter();
-
-subscribe('toothfix/booking/confirmation');
-
-//Set up Queue
-const Queue = require('bull');
-const redisConfig = {
-    redis: {
-        password: 'qtN6Ok1gmRDmPe0UP5sFQCmNhJEg5JPv',
-        host: 'redis-15929.c250.eu-central-1-1.ec2.cloud.redislabs.com',
-        port: 15929,
-    },
-};
-
-
-const requestQueue = new Queue('requestQueue', redisConfig);
-
-//MQTT listener for messages (all topics)
-mqttClient.on('message', function (topic, message) {
-    console.log("Emitted event from mqttClient");
-    eventEmitter.emit("message", topic, message);
-});
+const {requestQueue} = require('../utils/Queue')
 
 // POST
 router.post("/", async function (req, res, next) {
     let request = req.body;
     try {
         let job = await requestQueue.add(request);
-        let result = await job.finished()
+        let result = await job.finished();
         if (result === true) {
             let booking = await Booking.create(request);
             // publish("toothfix/notifications/booking", JSON.stringify(booking));
@@ -42,38 +17,8 @@ router.post("/", async function (req, res, next) {
             return res.status(422).json({ message: "slot not available" })
         }
     } catch (error) {
-        res.status(500).json(error);
+        res.status(500).json({ message: error.message });
     }
-});
-
-// Process jobs from the queue
-requestQueue.process(async function (job) {
-    console.log('Processing job:', job.data);
-    let slotIdMessage = { "slotId": job.data.slotId } 
-
-    let confirmationResult = await new Promise((resolve) => {
-        publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
-
-        eventEmitter.on("message", function (t, m) {
-            if (t === "toothfix/booking/confirmation") {
-                console.log("Received message from topic: ", t);
-                console.log("Message: ", m.toString());
-                const objConfirmation = JSON.parse(m.toString());
-                console.log(objConfirmation);
-                if(objConfirmation.available === true){
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            }
-        })
-    });
-    return confirmationResult
-});
-
-// Event listener for failed jobs
-requestQueue.on('failed', (job, err) => {
-    console.error(`Job ID ${job.id} failed with error:`, err);
 });
 
 //GET
