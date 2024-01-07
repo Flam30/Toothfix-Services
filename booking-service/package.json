@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "set NODE_ENV=test&&node app.js",
+    "test": "cross-env-shell NODE_ENV=test node app.js",
     "start": "node ./app.js",
     "dev": "nodemon ./app.js"
   },
@@ -19,5 +19,8 @@
     "nodemon": "^3.0.1",
     "bull": "^4.11.5",
     "redis": "^4.6.11"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

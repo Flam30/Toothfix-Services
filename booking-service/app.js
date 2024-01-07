@@ -73,10 +73,11 @@ app.use(function (err, req, res, next) {
 });
 
 app.listen(port, function (err) {
-  if (err) throw err;
-  console.log(`Booking service started`);
-  console.log(`Booking service listening on port ${port}, in ${env} mode`);
-  console.log(`http://localhost:${port}`);
+    if (err) throw err;
+    console.log(`Booking service started`);
+    console.log(`Booking service listening on port ${port}, in ${env} mode`);
+    if(env === 'test'){console.log("note: test mode is using another database to not full the main database")}
+    console.log(`http://localhost:${port}`);
 });
 
 module.exports = app;
