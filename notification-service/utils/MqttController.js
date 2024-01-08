@@ -106,7 +106,7 @@ function subscribeBookings() {
               objMessage.date.substring(5, 7) +
               "/" +
               objMessage.date.substring(0, 4),
-            time: objMessage.start,
+            time: objMessage.date.substring(11, 16),
             dentist: objMessage.dentist,
           }),
           attachments: [
@@ -200,7 +200,7 @@ function subscribeCancellations() {
               objMessage.date.substring(5, 7) +
               "/" +
               objMessage.date.substring(0, 4),
-            time: objMessage.start,
+            time: objMessage.date.substring(11, 16),
             dentist: objMessage.dentist,
           }),
           attachments: [
