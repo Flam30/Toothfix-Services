@@ -49,7 +49,7 @@ router.get("/:id", async function (req, res) {
 router.get("/patient/:id", async function (req, res) {
   try {
     var id = req.params.id;
-    const booking = await Booking.find({ patient: id });
+    const booking = await Booking.find({ patientId: id });
     res.status(200).json(booking);
   } catch (error) {
     res.status(404).json({ message: "Booking not found" });
