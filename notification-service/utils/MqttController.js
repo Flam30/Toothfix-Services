@@ -106,8 +106,8 @@ function subscribeBookings() {
               objMessage.date.substring(5, 7) +
               "/" +
               objMessage.date.substring(0, 4),
-            time: objMessage.date.substring(11, 16),
-            dentist: objMessage.dentist,
+            time: parseInt(objMessage.date.substring(11, 13)) + 1 + ":00",
+            dentist: objMessage.dentistName,
           }),
           attachments: [
             {
@@ -200,8 +200,9 @@ function subscribeCancellations() {
               objMessage.date.substring(5, 7) +
               "/" +
               objMessage.date.substring(0, 4),
-            time: objMessage.date.substring(11, 16),
-            dentist: objMessage.dentist,
+            time: parseInt(objMessage.date.substring(11, 13)) + 1 + ":00",
+            name: objMessage.patientName,
+            dentist: objMessage.dentistName,
           }),
           attachments: [
             {
@@ -252,6 +253,5 @@ module.exports = {
   publish,
   subscribeBookings,
   subscribeCancellations,
-  subscribeAvailability,
   connect,
 };
