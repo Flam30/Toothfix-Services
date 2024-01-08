@@ -1,3 +1,3 @@
 module.exports = {
-    password: encodeURIComponent('iloveteeth')
+  password: encodeURIComponent("iloveteeth"),
 };

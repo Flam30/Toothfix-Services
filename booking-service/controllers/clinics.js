@@ -35,16 +35,15 @@ router.get("/:id", async function (req, res) {
 
 //DELETE
 router.delete("/:id", async function (req, res) {
-    try {
-        const clinic = await Clinic.findByIdAndDelete(req.params.id);
-        if(!clinic){
-            res.status(404).json({ message: "Clinic not found" });
-        }
-        res.status(200).json(clinic);
-        
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const clinic = await Clinic.findByIdAndDelete(req.params.id);
+    if (!clinic) {
+      res.status(404).json({ message: "Clinic not found" });
     }
+    res.status(200).json(clinic);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 //PATCH opening hours
