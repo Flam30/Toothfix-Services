@@ -12,30 +12,6 @@ router.post("/", async function (req, res, next) {
   }
 });
 
-//POST dentist to clinic
-router.post("/:id/dentists", async function (req, res, next) {
-  try {
-    var id = req.params.id;
-    const clinic = await Clinic.findOne({ _id: id });
-    clinic.dentists.push(req.body);
-    clinic.save();
-    res.status(201).json(clinic);
-  } catch (error) {
-    return next(error);
-  }
-});
-
-//GET dentists from clinic
-router.get("/:id/dentists", async function (req, res, next) {
-  try {
-    var id = req.params.id;
-    const clinic = await Clinic.findOne({ _id: id });
-    res.status(200).json(clinic.dentists);
-  } catch (error) {
-    return next(error);
-  }
-});
-
 //GET
 router.get("/", async function (req, res, next) {
   try {
@@ -60,18 +36,14 @@ router.get("/:id", async function (req, res) {
 //DELETE
 router.delete("/:id", async function (req, res) {
   try {
-    var id = req.params.id;
-    const booking = await Booking.findOneAndDelete({ _id: id });
-    if (!booking) {
+    const clinic = await Clinic.findByIdAndDelete(req.params.id);
+    if (!clinic) {
       res.status(404).json({ message: "Clinic not found" });
-    } else {
-      res.status(200).json(booking);
     }
-  } catch (error) {}
-  Booking.findByIdAndRemove(req.params.id, req.body, function (err, booking) {
-    if (err) return next(err);
-    res.json(booking);
-  });
+    res.status(200).json(clinic);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 //PATCH opening hours

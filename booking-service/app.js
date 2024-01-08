@@ -10,16 +10,14 @@ var clinicSchema = require("./controllers/clinics");
 var dentistSchema = require("./controllers/dentists");
 
 const { MongoClient } = require("mongodb");
-const password = encodeURIComponent("iloveteeth");
 
 const { subscribe } = require("./utils/MqttController");
 
-var mongoURI =
-  process.env.MONGODB_URI ||
-  `mongodb+srv://admin:${password}@toothfixcluster0.ouccgbu.mongodb.net/?retryWrites=true&w=majority`;
 var port = process.env.PORT || 3001;
+const env = process.env.NODE_ENV || "development"; // development as default
+const config = require(`./configs/${env}` + ".js"); // import the config.js file based on the environment
 
-mongoose.connect(mongoURI).catch(function (err) {
+mongoose.connect(config.mongoURI).catch(function (err) {
   if (err) {
     console.error(`Failed to connect to MongoDB with given URI`);
     console.error(err.stack);
@@ -58,7 +56,7 @@ app.use("/*", function (req, res) {
 subscribe("toothfix/booking/confirmation"); //subscribe to booking confirmation topic
 
 // Error handler (i.e., when exception is thrown) must be registered last
-var env = app.get("env");
+
 // eslint-disable-next-line no-unused-vars
 app.use(function (err, req, res, next) {
   console.error(err.stack);
@@ -78,6 +76,11 @@ app.listen(port, function (err) {
   if (err) throw err;
   console.log(`Booking service started`);
   console.log(`Booking service listening on port ${port}, in ${env} mode`);
+  if (env === "test") {
+    console.log(
+      "note: test mode is using another database to not full the main database",
+    );
+  }
   console.log(`http://localhost:${port}`);
 });
 
