@@ -48,7 +48,7 @@ router.patch("/:id", async function (req, res) {
     dentist = await Dentist.findOneAndUpdate(
       { _id: req.params.id },
       newDentist,
-      { new: true }
+      { new: true },
     );
     res.status(200).json(dentist);
   } catch (error) {
