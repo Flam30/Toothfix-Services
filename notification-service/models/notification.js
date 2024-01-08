@@ -1,10 +1,10 @@
-var mongoose = require('mongoose');
+var mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 var notificationSchema = new Schema({
-    title : { type: String }, //make required
-    body : { type: String }, //make required
-    recepientEmail : { type: String }, 
+  title: { type: String }, //make required
+  body: { type: String }, //make required
+  recepientEmail: { type: String },
 });
 
-module.exports = mongoose.model('notifications', notificationSchema);
+module.exports = mongoose.model("notifications", notificationSchema);
