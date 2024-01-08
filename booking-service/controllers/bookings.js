@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var Booking = require("../models/booking");
 const { requestQueue } = require("../utils/Queue");
+const { publish } = require("../utils/MqttController");
 
 // POST
 router.post("/", async function (req, res, next) {
@@ -69,17 +70,16 @@ router.get("/dentist/:id", async function (req, res) {
 router.delete("/:id", async function (req, res) {
   try {
     var id = req.params.id;
-    const booking = await Booking.findById({ _id: id });
-    if (!booking) {
-      res.status(404).json({ message: "Booking not found" });
-    } else {
+    const booking = await Booking.findOneAndDelete({ _id: id });
+    if (booking !== null) {
+      publish("toothfix/notifications/cancellation", JSON.stringify(booking));
       res.status(200).json(booking);
+    } else {
+      res.status(404).json({ message: "Booking not found" });
     }
-  } catch (error) {}
-  Booking.findOneAndDelete(req.params.id, req.body, function (err, booking) {
-    if (err) return next(err);
-    res.json(booking);
-  });
+  } catch (error) {
+    res.status(404).json({ message: "Booking not found" });
+  }
 });
 
 module.exports = router;
