@@ -55,9 +55,10 @@
 
         devShells.default = pkgs.mkShell {
           inherit buildInputs;
+          inputsFrom = [config.treefmt.build.devShell];
+
           packages = with pkgs; [
             nil #nix language server
-            alejandra #nix formatter
             k6 #load testing for the backend
           ];
         };
