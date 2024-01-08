@@ -1,65 +1,23 @@
 var express = require('express');
 var router = express.Router();
 var Booking = require('../models/booking')
-const { mqtt, mqttClient, publish, subscribe } = require('../utils/MqttController');
-// const mqtt = require('mqtt');
-const { EventEmitter } = require('events');
-
-// Create an event emitter instance
-const eventEmitter = new EventEmitter();
-
-subscribe('toothfix/booking/confirmation');
-
-mqttClient.on('message', function (topic, message) {
-    eventEmitter.emit("message", topic, message);
-  });
-
-// Function to get confirmation from the other service -- TODO FIIIIIIXXXX THIIIIIIISSSSSS
-async function getConfirmation(slotId) {
-    return new Promise((resolve, reject) => {
-        eventEmitter.once("message", function (t, m) {
-            if (t === "toothfix/booking/confirmation") {
-                console.log("Received message from topic: ", t);
-                console.log("Message: ", m.toString());
-                const objConfirmation = JSON.parse(m.toString());
-                console.log(objConfirmation);
-                // resolve(true);
-                //check if the slotId is the same as the one in the message
-                if (objConfirmation.slotId === slotId) {
-                    if(objConfirmation.available === true){
-                        resolve(true);
-                    }else(resolve(false));
-                } else {
-                    resolve(false);
-                }
-            }else{reject();}
-        });
-    });
-}
+const {requestQueue} = require('../utils/Queue')
 
 // POST
 router.post("/", async function (req, res, next) {
+    let request = req.body;
     try {
-        //PART 1  --  publish so that the availability service sends a confirmation
-        const slotIdMessage = {
-            "slotId": req.body.slotId
-          }
-
-        publish('toothfix/booking/pending', JSON.stringify(slotIdMessage));
-        const slotId = req.body.slotId;
-
-        // Wait for the confirmation
-        const confirmationResult = await getConfirmation(slotId)
-            
-        //Logic for handling TRUE/FALSE from getConfirmation(slotId) goes here
-        if (confirmationResult) {
-            const booking = Booking.create(req.body);
-            res.status(200).json(booking);
+        let job = await requestQueue.add(request);
+        let result = await job.finished();
+        if (result === true) {
+            let booking = await Booking.create(request);
+            // publish("toothfix/notifications/booking", JSON.stringify(booking));
+            return res.status(200).json(booking);
         } else {
-            res.status(409).json({ message: 'Booking canceled. Slot not available.' });
+            return res.status(422).json({ message: "slot not available" })
         }
-    }catch (error) {
-        res.status(500).json(error);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 
