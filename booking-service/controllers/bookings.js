@@ -13,6 +13,7 @@ router.post("/", async function (req, res, next) {
     if (result === true) {
       let booking = await Booking.create(request);
       // publish("toothfix/notifications/booking", JSON.stringify(booking));
+      publish("toothfix/logging/newbooking", "New booking created"); //publish for logging
       return res.status(200).json(booking);
     } else {
       return res.status(422).json({ message: "slot not available" });
@@ -73,6 +74,7 @@ router.delete("/:id", async function (req, res) {
     const booking = await Booking.findOneAndDelete({ _id: id });
     if (booking !== null) {
       publish("toothfix/notifications/cancellation", JSON.stringify(booking));
+      publish("toothfix/logging/bookingcancelled"); //for logging
       res.status(200).json(booking);
     } else {
       res.status(404).json({ message: "Booking not found" });

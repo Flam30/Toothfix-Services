@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var Slot = require("../models/slots");
+var { publish } = require("../utils/mqttController.js");
 
 const { sendBookingConfirmation } = require("../utils/sendNotification.js");
 
@@ -8,6 +9,7 @@ const { sendBookingConfirmation } = require("../utils/sendNotification.js");
 router.post("/", async function (req, res, next) {
   try {
     const slots = await Slot.create(req.body);
+    publish("toothfix/logging/newslot", "new slot created");
     res.status(201).json(slots);
   } catch (error) {
     return next(error);

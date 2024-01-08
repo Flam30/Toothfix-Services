@@ -33,19 +33,42 @@ function subscribe(topic) {
       if (t === "toothfix/logging/newbooking") {
         try {
           console.log("new booking received");
-          console.log(m.toString());
           var date = new Date();
           var obj = {
             eventType: "Booking made",
-            eventDate:
-              date.getDate() +
-              "/" +
-              parseInt(date.getMonth() + 1) +
-              "/" +
-              date.getFullYear(),
+            eventDate: date.toUTCString(),
             responsibleService: "Booking service",
           };
-
+          await Log.create(obj);
+          console.log("201 log created" + JSON.stringify(obj));
+        } catch (error) {
+          console.log(error, "500");
+        }
+      }
+      if (t === "toothfix/logging/newslot") {
+        try {
+          console.log("new slot received");
+          var date = new Date();
+          var obj = {
+            eventType: "Slot created",
+            eventDate: date.toUTCString(),
+            responsibleService: "Availability service",
+          };
+          await Log.create(obj);
+          console.log("201 log created" + JSON.stringify(obj));
+        } catch (error) {
+          console.log(error, "500");
+        }
+      }
+      if (t === "toothfix/logging/bookingcancelled") {
+        try {
+          console.log("booking cancelled received");
+          var date = new Date();
+          var obj = {
+            eventType: "Booking cancelled",
+            eventDate: date.toUTCString(),
+            responsibleService: "Booking service",
+          };
           await Log.create(obj);
           console.log("201 log created" + JSON.stringify(obj));
         } catch (error) {
