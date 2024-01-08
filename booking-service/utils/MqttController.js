@@ -27,10 +27,10 @@ function subscribe(topic) {
     console.log(`Subscribed to topic: ${topic}`);
   });
 }
-  
+
 module.exports = {
-    publish,
-    subscribe,
-    mqttClient,
-    mqtt
+  publish,
+  subscribe,
+  mqttClient,
+  mqtt,
 };
