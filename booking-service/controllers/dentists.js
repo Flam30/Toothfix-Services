@@ -25,7 +25,7 @@ router.get("/", async function (req, res, next) {
 router.get("/:id", async function (req, res) {
   try {
     var id = req.params.id;
-    const dentist = await Dentist.findOne({ _id: id });
+    const dentist = await Dentist.findOne({ personnummer: id });
     res.status(200).json(dentist);
   } catch (error) {
     res.status(404).json({ message: "Dentist not found" });
