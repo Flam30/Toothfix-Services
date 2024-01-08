@@ -1,8 +1,8 @@
 const mqtt = require("mqtt");
 const bodyParser = require("body-parser");
-var nodemailer = require('nodemailer');
-const Handlebars = require('handlebars');
-const fs = require('fs');
+var nodemailer = require("nodemailer");
+const Handlebars = require("handlebars");
+const fs = require("fs");
 
 var transporter = nodemailer.createTransport({
   service: "OVH",
@@ -17,12 +17,17 @@ var transporter = nodemailer.createTransport({
   from: "noreply@toothfix.me",
 });
 
-const bookingTemplateImport = fs.readFileSync('./templates/booking.html', 'utf8');
+const bookingTemplateImport = fs.readFileSync(
+  "./templates/booking.html",
+  "utf8"
+);
 const bookingTemplate = Handlebars.compile(bookingTemplateImport);
 
-const cancellationTemplateImport = fs.readFileSync('./templates/cancellation.html', 'utf8');
+const cancellationTemplateImport = fs.readFileSync(
+  "./templates/cancellation.html",
+  "utf8"
+);
 const cancellationTemplate = Handlebars.compile(cancellationTemplateImport);
-
 
 var express = require("express");
 var Notification = require("../models/notification");
@@ -79,10 +84,10 @@ function subscribeBookings() {
           title: "Booking confirmation",
           body: `You've booked an appointment! You have a new booking on ${objMessage.date.substring(
             8,
-            10,
+            10
           )}/${objMessage.date.substring(5, 7)}/${objMessage.date.substring(
             0,
-            4,
+            4
           )} (DD/MM/YYYY) at ${objMessage.date.substring(11, 16)} with ${
             objMessage.dentist
           }.`,
@@ -94,33 +99,43 @@ function subscribeBookings() {
           to: objMessage.patientEmail,
           subject: notification.title,
           text: notification.body,
-          html: bookingTemplate({date: objMessage.date.substring(8,10) + "/" + objMessage.date.substring(5,7) + "/" + objMessage.date.substring(0,4), time: objMessage.start, dentist: objMessage.dentist}),
-          attachments: [{
-            filename: 'toothfix.png',
-            path: './templates/images/toothfix.png',
-            cid: 'toothfix'
-          }, 
-          {
-            filename: 'bell.png',
-            path: './templates/images/bell-icon.png',
-            cid: 'bell'
-          }, 
-          {
-            filename: 'facebook.png',
-            path: './templates/images/facebook.png',
-            cid: 'facebook'
-          }, 
-          {
-            filename: 'twitter.png',
-            path: './templates/images/twitter.png',
-            cid: 'twitter'
-          }, 
-          {
-            filename: 'instagram.png',
-            path: './templates/images/instagram.png',
-            cid: 'instagram'
-          }
-          ]
+          html: bookingTemplate({
+            date:
+              objMessage.date.substring(8, 10) +
+              "/" +
+              objMessage.date.substring(5, 7) +
+              "/" +
+              objMessage.date.substring(0, 4),
+            time: objMessage.start,
+            dentist: objMessage.dentist,
+          }),
+          attachments: [
+            {
+              filename: "toothfix.png",
+              path: "./templates/images/toothfix.png",
+              cid: "toothfix",
+            },
+            {
+              filename: "bell.png",
+              path: "./templates/images/bell-icon.png",
+              cid: "bell",
+            },
+            {
+              filename: "facebook.png",
+              path: "./templates/images/facebook.png",
+              cid: "facebook",
+            },
+            {
+              filename: "twitter.png",
+              path: "./templates/images/twitter.png",
+              cid: "twitter",
+            },
+            {
+              filename: "instagram.png",
+              path: "./templates/images/instagram.png",
+              cid: "instagram",
+            },
+          ],
         };
 
         transporter.sendMail(message, function (err, info) {
@@ -163,10 +178,10 @@ function subscribeCancellations() {
           title: "Booking cancelled",
           body: `Your ToothFix appointment on ${objMessage.date.substring(
             8,
-            10,
+            10
           )}/${objMessage.date.substring(5, 7)}/${objMessage.date.substring(
             0,
-            4,
+            4
           )} at ${objMessage.date.substring(11, 16)} with ${
             objMessage.dentist
           } has been cancelled.`,
@@ -178,33 +193,43 @@ function subscribeCancellations() {
           to: objMessage.patientEmail,
           subject: notification.title,
           text: notification.body,
-          html: cancellationTemplate({date: objMessage.date.substring(8,10) + "/" + objMessage.date.substring(5,7) + "/" + objMessage.date.substring(0,4), time: objMessage.start, dentist: objMessage.dentist}),
-          attachments: [{
-            filename: 'toothfix.png',
-            path: './templates/images/toothfix.png',
-            cid: 'toothfix'
-          }, 
-          {
-            filename: 'bell.png',
-            path: './templates/images/bell-icon.png',
-            cid: 'bell'
-          }, 
-          {
-            filename: 'facebook.png',
-            path: './templates/images/facebook.png',
-            cid: 'facebook'
-          }, 
-          {
-            filename: 'twitter.png',
-            path: './templates/images/twitter.png',
-            cid: 'twitter'
-          }, 
-          {
-            filename: 'instagram.png',
-            path: './templates/images/instagram.png',
-            cid: 'instagram'
-          }
-          ]
+          html: cancellationTemplate({
+            date:
+              objMessage.date.substring(8, 10) +
+              "/" +
+              objMessage.date.substring(5, 7) +
+              "/" +
+              objMessage.date.substring(0, 4),
+            time: objMessage.start,
+            dentist: objMessage.dentist,
+          }),
+          attachments: [
+            {
+              filename: "toothfix.png",
+              path: "./templates/images/toothfix.png",
+              cid: "toothfix",
+            },
+            {
+              filename: "bell.png",
+              path: "./templates/images/bell-icon.png",
+              cid: "bell",
+            },
+            {
+              filename: "facebook.png",
+              path: "./templates/images/facebook.png",
+              cid: "facebook",
+            },
+            {
+              filename: "twitter.png",
+              path: "./templates/images/twitter.png",
+              cid: "twitter",
+            },
+            {
+              filename: "instagram.png",
+              path: "./templates/images/instagram.png",
+              cid: "instagram",
+            },
+          ],
         };
 
         transporter.sendMail(message, function (err, info) {
