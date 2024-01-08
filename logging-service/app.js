@@ -2,6 +2,10 @@ var express = require('express');
 var mongoose = require('mongoose');
 var morgan = require('morgan');
 var cors = require('cors');
+const {publish, subscribe, mqttClient, mqtt} = require('./utils/MqttController');
+
+//Import routes
+var LogSchema = require("./controllers/logs")
 
 // Connect to MongoDB
 const password = encodeURIComponent("iloveteeth");
@@ -16,6 +20,9 @@ mongoose.connect(mongoURI).catch(function (err) {
     }
     console.log(`Connected to MongoDB with URI: ${mongoURI}`);
 });
+
+//Connect to mqtt
+subscribe("toothfix/logging/newbooking"); //temporary topic, maybe more are needed
 
 // Create Express app
 var app = express();
@@ -32,6 +39,8 @@ app.use(cors());
 app.get('/', function (req, res) {
     res.json({ message: 'Welcome to ToothFix API' });
 });
+app.use('/logs', LogSchema);
+
 
 //catch invalid routes
 app.use('/*', function (req, res) {
