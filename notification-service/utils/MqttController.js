@@ -19,13 +19,13 @@ var transporter = nodemailer.createTransport({
 
 const bookingTemplateImport = fs.readFileSync(
   "./templates/booking.html",
-  "utf8"
+  "utf8",
 );
 const bookingTemplate = Handlebars.compile(bookingTemplateImport);
 
 const cancellationTemplateImport = fs.readFileSync(
   "./templates/cancellation.html",
-  "utf8"
+  "utf8",
 );
 const cancellationTemplate = Handlebars.compile(cancellationTemplateImport);
 
@@ -84,10 +84,10 @@ function subscribeBookings() {
           title: "Booking confirmation",
           body: `You've booked an appointment! You have a new booking on ${objMessage.date.substring(
             8,
-            10
+            10,
           )}/${objMessage.date.substring(5, 7)}/${objMessage.date.substring(
             0,
-            4
+            4,
           )} (DD/MM/YYYY) at ${objMessage.date.substring(11, 16)} with ${
             objMessage.dentist
           }.`,
@@ -178,10 +178,10 @@ function subscribeCancellations() {
           title: "Booking cancelled",
           body: `Your ToothFix appointment on ${objMessage.date.substring(
             8,
-            10
+            10,
           )}/${objMessage.date.substring(5, 7)}/${objMessage.date.substring(
             0,
-            4
+            4,
           )} at ${objMessage.date.substring(11, 16)} with ${
             objMessage.dentist
           } has been cancelled.`,
