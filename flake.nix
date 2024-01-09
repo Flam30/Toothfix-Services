@@ -16,7 +16,12 @@
         pkgs,
         ...
       }: let
-        projects = ["availability-service" "notification-service" "booking-service"];
+        projects = [
+          "availability-service"
+          "notification-service"
+          "booking-service"
+          "logging-service"
+        ];
         forEachProject = pkgs.lib.genAttrs projects;
         buildInputs = with pkgs; [
           nodejs_20

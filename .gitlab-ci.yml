@@ -16,21 +16,24 @@ before_script:
 
 notification-service:
   stage: build
-  script: 
+  script:
     - nix ${flags} build .#notification-service && cachix push dit356 result
 
 availability-service:
   stage: build
-  script: 
+  script:
     - nix ${flags} build .#availability-service && cachix push dit356 result
 
 booking-service:
   stage: build
-  script: 
+  script:
     - nix ${flags} build .#booking-service && cachix push dit356 result
+
+logging-service:
+  stage: build
+  script: nix build .#logging-service && cachix push dit356 result
 
 check-formatting:
   stage: check
   script: nix ${flags} flake check
   needs: []
-
