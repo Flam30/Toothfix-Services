@@ -46,8 +46,16 @@ If not, you will have to run each service individually. To do so, open a termina
 
 Repeat this for each service.
 
+## How to see the load of our system
+
+1. Make sure that you have all the services running **including the logging service**
+2. Open a terminal in the root folder of the logging service and execute the following command:
+    - `npm install -g`
+    - Now you can use `stats` to see the full list of commands that you can execute.
+
+
 ## Ports
 - `booking - 3001`
 - `availability - 3002`
 - `notification - 3003`
-- `logging - 3004`
+- `logging - 3011`
