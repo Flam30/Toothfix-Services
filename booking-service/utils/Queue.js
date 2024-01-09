@@ -6,9 +6,6 @@ const { mqttClient, publish } = require("../utils/MqttController");
 // Create an event emitter instance
 const eventEmitter = new EventEmitter();
 
-//Create a new queue
-const requestQueue = new Queue("requestQueue");
-
 //Online redis db
 const redisConfig = {
   redis: {
@@ -18,6 +15,9 @@ const redisConfig = {
   },
 };
 
+//Create a new queue
+const requestQueue = new Queue("requestQueue", redisConfig);
+
 //MQTT listener for messages (all topics)
 mqttClient.on("message", function (topic, message) {
   console.log("Emitted event from mqttClient");
@@ -25,7 +25,7 @@ mqttClient.on("message", function (topic, message) {
 });
 
 // Process jobs from the queue
-requestQueue.process(async function (job) {
+requestQueue.process(100, async function (job) {
   console.log("Processing job:", job.data);
   let slotIdMessage = { slotId: job.data.slotId };
 
