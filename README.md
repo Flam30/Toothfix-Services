@@ -28,21 +28,26 @@ BANCs controls the backend operations of Toothfix. To communicate to the fronten
   - The service will also send a notification to the user if the booking is canceled.
   - The service will also send a notification to the dentist if a booking is made. 
 
+- [Logging](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/bancs/-/tree/main/logging-service?ref_type=heads):
+  - This service is responsible for keeping track of the important actions made in our system.
+  - The service will log into a database whenever a booking is made or canceled and when new slots become available.
+  - The service also provides a way of getting the logs to see statistics of the system.
+
 ## How to run the services 
 *Note: To have our entire system running, you will also need to run the [API Delegator](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/api-delegator) and the [Frontend](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/patient-interface).*
 
-**TODO: add npm install for every service
-
-Now, run the services:
-
-### Windows
+Now, for running the services:
 1. Clone the repository and open the root folder, you will see all the folders for the services.
-2. Execute `servicesrunner.bat` to run all the services at once.
+2. If you are using windows you can run the `servicesrunner.bat` file to run all the services at once. 
+If not, you will have to run each service individually. To do so, open a terminal in the root folder of the service you want to run and execute the following commands:
 
-### Linux
-@carlos
+    - `npm install`
+    - `npm start` 
+
+Repeat this for each service.
 
 ## Ports
 - `booking - 3001`
 - `availability - 3002`
 - `notification - 3003`
+- `logging - 3004`
