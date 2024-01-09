@@ -31,7 +31,7 @@ booking-service:
 
 logging-service:
   stage: build
-  script: nix build .#logging-service && cachix push dit356 result
+  script: nix ${flags} build .#logging-service && cachix push dit356 result
 
 check-formatting:
   stage: check
