@@ -25,6 +25,7 @@ BANCs controls the backend operations of Toothfix. To communicate to the fronten
   - It will also communicate with the availability service to make sure that the booking is possible.
   - Whenever a booking is made, this service will send a message to the notification service to notify the user of the booking.
   - This service will also manage the cancelations of bookings by users or dentists.
+  - Note: redis needs to be running locally on port 6379 for this service to work.
 
 - [Notification](https://git.chalmers.se/courses/dit355/2023/student-teams/dit356-2023-06/bancs/-/tree/main/notification-service?ref_type=heads):
   - This service is responsible for sending notifications to the users whenever they make a book.
