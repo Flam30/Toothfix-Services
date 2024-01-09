@@ -1,22 +1,24 @@
 var express = require("express");
 var mongoose = require("mongoose");
 var morgan = require("morgan");
-var path = require("path");
 var cors = require("cors");
+const {
+  publish,
+  subscribe,
+  mqttClient,
+  mqtt,
+} = require("./utils/MqttController");
 
-// Import routes
-var notificationSchema = require("./controllers/notifications");
-var MQTT = require("./utils/MqttController");
+//Import routes
+var LogSchema = require("./controllers/logs");
 
-const { MongoClient } = require("mongodb");
+// Connect to MongoDB
 const password = encodeURIComponent("iloveteeth");
-
 var mongoURI =
   process.env.MONGODB_URI ||
-  `mongodb+srv://admin:${password}@toothfixclusternotifica.zrwvqej.mongodb.net/?retryWrites=true&w=majority`;
-var port = process.env.PORT || 3003;
+  `mongodb+srv://admin:${password}@cluster0.mm3fzdt.mongodb.net/?retryWrites=true&w=majority`;
+var port = process.env.PORT || 3004;
 
-//Connect to the database
 mongoose.connect(mongoURI).catch(function (err) {
   if (err) {
     console.error(`Failed to connect to MongoDB with given URI`);
@@ -26,12 +28,8 @@ mongoose.connect(mongoURI).catch(function (err) {
   console.log(`Connected to MongoDB with URI: ${mongoURI}`);
 });
 
-// Connect to MQTT broker
-console.log("connected to MQTT broker");
-
-//Subscribe to MQTT topics
-MQTT.subscribeBookings(); //subscribe to booking topic
-MQTT.subscribeCancellations(); //subscribe to cancellations
+//Connect to mqtt
+subscribe("toothfix/logging/#");
 
 // Create Express app
 var app = express();
@@ -46,18 +44,15 @@ app.use(cors());
 
 // Define routes
 app.get("/", function (req, res) {
-  res.json({ message: "Welcome to notifications API" });
+  res.json({ message: "Welcome to ToothFix API" });
 });
-
-//put the routes:
-app.use("/notifications", notificationSchema);
+app.use("/logs", LogSchema);
 
 //catch invalid routes
 app.use("/*", function (req, res) {
   res.status(404).send({ url: req.originalUrl + " not found" });
 });
 
-// Error handler (i.e., when exception is thrown) must be registered last
 var env = app.get("env");
 // eslint-disable-next-line no-unused-vars
 app.use(function (err, req, res, next) {
@@ -76,8 +71,8 @@ app.use(function (err, req, res, next) {
 
 app.listen(port, function (err) {
   if (err) throw err;
-  console.log(`Notification service started`);
-  console.log(`Notification service listening on port ${port}, in ${env} mode`);
+  console.log(`Logging service started`);
+  console.log(`Logging service listening on port ${port}, in ${env} mode`);
   console.log(`http://localhost:${port}`);
 });
 

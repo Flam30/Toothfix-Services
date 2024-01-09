@@ -1,65 +1,67 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-var Slot = require('../models/slots')
+var Slot = require("../models/slots");
+var { publish } = require("../utils/mqttController.js");
 
-const { sendBookingConfirmation } = require('../utils/sendNotification.js');
-
+const { sendBookingConfirmation } = require("../utils/sendNotification.js");
 
 //POST
 router.post("/", async function (req, res, next) {
-    try {
-        const slots = await Slot.create(req.body);
-        res.status(201).json(slots);
-    } catch (error) {
-        return next(error);
-    }
+  try {
+    const slots = await Slot.create(req.body);
+    publish("toothfix/logging/newslot", "new slot created");
+    res.status(201).json(slots);
+  } catch (error) {
+    return next(error);
+  }
 });
 
 //PATCH
 router.patch("/:_id", async function (req, res, next) {
-    try {
-        const slots = await Slot.findById(req.params._id);
-        slots.available = req.body.available;
-        slots.save();
-        res.status(200).json(slots);
-    } catch (error) {
-        return next(error);
-    }
+  try {
+    const slots = await Slot.findById(req.params._id);
+    slots.available = req.body.available;
+    slots.save();
+    res.status(200).json(slots);
+  } catch (error) {
+    return next(error);
+  }
 });
 
-
 //GET
-router.get("/", async function (res, next) {
-    try {
-        const slots = await Slot.find({});
-        res.status(200).json(slots);
-    } catch (error) {
-        return next(error);
-    }
+router.get("/", async function (req, res, next) {
+  try {
+    const slots = await Slot.find({});
+    res.status(200).json(slots);
+  } catch (error) {
+    return next(error);
+  }
 });
 
 //GET available bookings by week number
-router.get("/weekNumber/:weekNumber/dentist/:dentist", async function (req, res, next) {
+router.get(
+  "/weekNumber/:weekNumber/dentist/:dentist",
+  async function (req, res, next) {
     try {
-        const slots = await Slot.find({
-            weekNumber: req.params.weekNumber,
-            dentist: req.params.dentist,
-            available: true
-        })
-        res.status(200).json(slots);
+      const slots = await Slot.find({
+        weekNumber: req.params.weekNumber,
+        dentist: req.params.dentist,
+        available: true,
+      });
+      res.status(200).json(slots);
     } catch (error) {
-        return next(error);
+      return next(error);
     }
-})
+  },
+);
 
 //GET confirmation request for the delegator
-router.get("/confirmation/:_id", async function (req, next) {
-    try {
-        sendBookingConfirmation(req.params._id);
-    }
-    catch (error) {
-        return next(error);
-    }
-})
+router.get("/confirmation/:_id", async function (req, res, next) {
+  try {
+    sendBookingConfirmation(req.params._id);
+  } catch (error) {
+    return next(error);
+  }
+});
 
 module.exports = router;
