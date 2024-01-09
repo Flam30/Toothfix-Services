@@ -6,9 +6,6 @@ const { mqttClient, publish } = require("../utils/MqttController");
 // Create an event emitter instance
 const eventEmitter = new EventEmitter();
 
-//Create a new queue
-const requestQueue = new Queue("requestQueue");
-
 //Online redis db
 const redisConfig = {
   redis: {
@@ -17,6 +14,9 @@ const redisConfig = {
     port: 15929,
   },
 };
+
+//Create a new queue
+const requestQueue = new Queue("requestQueue", redisConfig);
 
 //MQTT listener for messages (all topics)
 mqttClient.on("message", function (topic, message) {

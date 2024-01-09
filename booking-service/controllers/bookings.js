@@ -14,9 +14,9 @@ router.post("/", async function (req, res, next) {
       let booking = await Booking.create(request);
       // publish("toothfix/notifications/booking", JSON.stringify(booking));
       publish("toothfix/logging/newbooking", "New booking created"); //publish for logging
-      return res.status(200).json(booking);
+      return res.status(201).json(booking);
     } else {
-      return res.status(422).json({ message: "slot not available" });
+      return res.status(204).json({ message: "slot not available" });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
