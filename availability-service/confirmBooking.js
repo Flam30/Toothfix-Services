@@ -1,6 +1,6 @@
 const { mqttClient, subscribe } = require("./utils/mqttController.js");
 const { sendBookingConfirmation } = require("./utils/sendNotification.js");
-const { updateSlot } = require("./utils/updateSlot.js")
+const { updateSlot } = require("./utils/updateSlot.js");
 
 const pendingTopic = "toothfix/booking/pending";
 
@@ -16,7 +16,7 @@ async function getMessages() {
         console.log(objMessage.slotId);
 
         sendBookingConfirmation(objMessage.slotId);
-        updateSlot(objMessage.slotId)
+        updateSlot(objMessage.slotId);
       } catch (error) {
         console.log(error, "500");
       }
