@@ -11,12 +11,12 @@ router.post("/", async function (req, res, next) {
   try {
     let request = req.body;
     if (processedReqs.includes(request.slotId)) {
-      console.log(request.slotId)
+      console.log(request.slotId);
       return res.status(204).json({ message: "slot not available" });
     } else {
-      processedReqs.push(request.slotId)
+      processedReqs.push(request.slotId);
 
-      console.log(request.slotId)
+      console.log(request.slotId);
       let job = await requestQueue.add(request);
       let result = await job.finished();
       if (result === true) {
@@ -27,8 +27,7 @@ router.post("/", async function (req, res, next) {
       } else {
         return res.status(204).json({ message: "slot not available" });
       }
-
-    };
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -83,9 +82,9 @@ router.delete("/:id", async function (req, res) {
   try {
     var id = req.params.id;
     const booking = await Booking.findOneAndDelete({ _id: id });
-    console.log(booking)
+    console.log(booking);
     if (booking !== null) {
-      processedReqs.splice(processedReqs.indexOf(booking.slotId))
+      processedReqs.splice(processedReqs.indexOf(booking.slotId));
       publish("toothfix/notifications/cancellation", JSON.stringify(booking));
       publish("toothfix/logging/bookingcancelled"); //for logging
       res.status(200).json(booking);
