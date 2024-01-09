@@ -16,7 +16,7 @@ const redisConfig = {
 };
 
 //Create a new queue
-const requestQueue = new Queue("requestQueue", redisConfig);
+const requestQueue = new Queue("requestQueue");
 
 //MQTT listener for messages (all topics)
 mqttClient.on("message", function (topic, message) {
