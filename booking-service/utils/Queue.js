@@ -16,7 +16,7 @@ const redisConfig = {
 };
 
 //Create a new queue
-const requestQueue = new Queue("requestQueue", redisConfig);
+const requestQueue = new Queue("requestQueue");
 
 //MQTT listener for messages (all topics)
 mqttClient.on("message", function (topic, message) {
@@ -25,7 +25,7 @@ mqttClient.on("message", function (topic, message) {
 });
 
 // Process jobs from the queue
-requestQueue.process(async function (job) {
+requestQueue.process( async function (job) {
   console.log("Processing job:", job.data);
   let slotIdMessage = { slotId: job.data.slotId };
 

@@ -4,20 +4,31 @@ var Booking = require("../models/booking");
 const { requestQueue } = require("../utils/Queue");
 const { publish } = require("../utils/MqttController");
 
+const processedReqs = [];
+
 // POST
 router.post("/", async function (req, res, next) {
-  let request = req.body;
   try {
-    let job = await requestQueue.add(request);
-    let result = await job.finished();
-    if (result === true) {
-      let booking = await Booking.create(request);
-      // publish("toothfix/notifications/booking", JSON.stringify(booking));
-      publish("toothfix/logging/newbooking", "New booking created"); //publish for logging
-      return res.status(201).json(booking);
-    } else {
+    let request = req.body;
+    if (processedReqs.includes(request.slotId)) {
+      console.log(request.slotId)
       return res.status(204).json({ message: "slot not available" });
-    }
+    } else {
+      processedReqs.push(request.slotId)
+
+      console.log(request.slotId)
+      let job = await requestQueue.add(request);
+      let result = await job.finished();
+      if (result === true) {
+        let booking = await Booking.create(request);
+        // publish("toothfix/notifications/booking", JSON.stringify(booking));
+        //publish("toothfix/logging/newbooking", "New booking created"); //publish for logging
+        return res.status(201).json(booking);
+      } else {
+        return res.status(204).json({ message: "slot not available" });
+      }
+
+    };
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -72,7 +83,9 @@ router.delete("/:id", async function (req, res) {
   try {
     var id = req.params.id;
     const booking = await Booking.findOneAndDelete({ _id: id });
+    console.log(booking)
     if (booking !== null) {
+      processedReqs.splice(processedReqs.indexOf(booking.slotId))
       publish("toothfix/notifications/cancellation", JSON.stringify(booking));
       publish("toothfix/logging/bookingcancelled"); //for logging
       res.status(200).json(booking);
