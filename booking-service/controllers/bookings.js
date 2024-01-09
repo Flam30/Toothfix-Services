@@ -21,8 +21,8 @@ router.post("/", async function (req, res, next) {
       let result = await job.finished();
       if (result === true) {
         let booking = await Booking.create(request);
-        // publish("toothfix/notifications/booking", JSON.stringify(booking));
-        //publish("toothfix/logging/newbooking", "New booking created"); //publish for logging
+        publish("toothfix/notifications/booking", JSON.stringify(booking));
+        publish("toothfix/logging/newbooking", "New booking created"); //publish for logging
         return res.status(201).json(booking);
       } else {
         return res.status(204).json({ message: "slot not available" });
